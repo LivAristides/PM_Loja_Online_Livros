@@ -10,8 +10,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 |---:|---|---|---|---|---|
 | 1 | TASK-001 | Fundação | P0 | - | DONE |
 | 2 | TASK-002 | Fundação | P0 | 001 | DONE |
-| 3 | TASK-003 | Fundação | P0 | 002 | READY |
-| 4 | TASK-004 | Identidade | P0 | 003 | BLOCKED |
+| 3 | TASK-003 | Fundação | P0 | 002 | DONE |
+| 4 | TASK-004 | Identidade | P0 | 003 | READY |
 | 5 | TASK-005 | Identidade | P0 | 004 | BLOCKED |
 | 6 | TASK-006 | Identidade | P0 | 005 | BLOCKED |
 | 7 | TASK-007 | Checkpoint | P0 | 006 | BLOCKED |
@@ -52,6 +52,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-003 - Infraestrutura transversal
 
 **Objetivo:** Implementar tratamento de erro, correlação, auditoria básica, outbox e agendamento seguro. **Depende:** 002. **Rastreia:** RF-018, RNF-007, ADR-003. **Aceite:** mensagem sobrevive reinício e falha é registrável. **Testes:** unitário/integrado de outbox. **Allowed:** shared/outbox/audit/config. **Forbidden:** regras de pedidos/pagamento. **DoD:** gates aplicáveis passam.
+
+**Status note:** DONE em 19/10/2026: outbox persistente, auditoria básica, correlação e tratamento seguro de erro implementados; testes unitários e de integração passaram contra o PostgreSQL do Compose.
 
 ## TASK-004 - Identidade, sessão e papéis
 

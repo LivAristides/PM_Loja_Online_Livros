@@ -28,6 +28,12 @@ mvn -Pintegration verify
 
 As entidades de catálogo, clientes, pedidos e demais dados de domínio serão criadas somente nas TASKs correspondentes.
 
+## Infraestrutura transversal
+
+O backend propaga `X-Correlation-Id` em cada resposta HTTP; valores inválidos são substituídos por UUID novo. Erros inesperados retornam uma mensagem segura e o identificador de correlação, sem detalhes internos.
+
+As tabelas `audit_log` e `outbox_message` são infraestrutura técnica. Mensagens da outbox são persistidas antes do processamento e possuem estados `PENDING`, `PROCESSING`, `COMPLETED` e `FAILED`. O agendador tenta mensagens disponíveis em lotes, usa bloqueio de linha para evitar processamento simultâneo e registra falhas para nova tentativa. Nenhum fluxo de pedidos, pagamentos ou notificações é implementado nesta etapa.
+
 ## Estrutura
 
 - `backend/`: Spring Boot e futuras migrações Flyway.
