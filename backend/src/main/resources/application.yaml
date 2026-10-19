@@ -3,6 +3,8 @@ spring:
     name: livraria-online
   profiles:
     default: local
+  flyway:
+    locations: classpath:db/migration
 
 server:
   port: 8080

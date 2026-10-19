@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:livraria}
+    username: ${DB_USERNAME:livraria_app}
+    password: ${DB_PASSWORD:change-me-local-only}

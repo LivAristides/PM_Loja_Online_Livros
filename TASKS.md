@@ -9,8 +9,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | Ordem | TASK | Fase | Prioridade | Dependências | Estado |
 |---:|---|---|---|---|---|
 | 1 | TASK-001 | Fundação | P0 | - | DONE |
-| 2 | TASK-002 | Fundação | P0 | 001 | READY |
-| 3 | TASK-003 | Fundação | P0 | 002 | BLOCKED |
+| 2 | TASK-002 | Fundação | P0 | 001 | DONE |
+| 3 | TASK-003 | Fundação | P0 | 002 | READY |
 | 4 | TASK-004 | Identidade | P0 | 003 | BLOCKED |
 | 5 | TASK-005 | Identidade | P0 | 004 | BLOCKED |
 | 6 | TASK-006 | Identidade | P0 | 005 | BLOCKED |
