@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: livraria-online
+  profiles:
+    default: local
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -8,8 +8,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 | Ordem | TASK | Fase | Prioridade | Dependências | Estado |
 |---:|---|---|---|---|---|
-| 1 | TASK-001 | Fundação | P0 | - | READY |
-| 2 | TASK-002 | Fundação | P0 | 001 | BLOCKED |
+| 1 | TASK-001 | Fundação | P0 | - | DONE |
+| 2 | TASK-002 | Fundação | P0 | 001 | READY |
 | 3 | TASK-003 | Fundação | P0 | 002 | BLOCKED |
 | 4 | TASK-004 | Identidade | P0 | 003 | BLOCKED |
 | 5 | TASK-005 | Identidade | P0 | 004 | BLOCKED |
@@ -42,6 +42,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-001 - Inicializar monorepo e execução local
 
 **Objetivo:** Criar estrutura `backend/` e `frontend/`, Compose, convenções e configuração sem segredos. **Rastreia:** RNF-005/008, ADR-001. **Aceite:** uma instrução sobe os serviços vazios e documentação explica variáveis. **Testes/gates:** build base e Compose. **Allowed:** raiz, Docker, backend/frontend de scaffold, CI inicial. **Forbidden:** funcionalidades de domínio, credenciais reais. **DoD:** build/Compose/documentação passam.
+
+**Status note:** DONE em 19/10/2026: imagens criadas e serviços validados via Docker Compose; backend health, frontend e Mailpit responderam com sucesso.
 
 ## TASK-002 - Persistência, Flyway e dados de demonstração
 
