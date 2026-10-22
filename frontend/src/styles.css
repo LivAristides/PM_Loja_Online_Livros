@@ -1,15 +1,18 @@
 :root {
   font-family: system-ui, sans-serif;
-  color: #1f2937;
-  background: #f9fafb;
+  color: #29201b;
+  background: #f8f5f1;
 }
 
 body {
   margin: 0;
 }
 
-main {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-}
+.access-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
+.access-card { width: min(100%, 420px); padding: 32px; background: #fff; border-radius: 12px; box-shadow: 0 8px 28px #2d1d1220; }
+.eyebrow { margin: 0; color: #76480f; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; }
+h1 { margin: 8px 0; } .subtitle { color: #625851; } form { display: grid; gap: 16px; margin-top: 20px; }
+label { display: grid; gap: 6px; font-weight: 600; } input, button { font: inherit; padding: 11px 12px; border-radius: 6px; }
+input { border: 1px solid #a69b94; } button { border: 0; background: #623b12; color: #fff; font-weight: 700; cursor: pointer; }
+button:disabled { opacity: .65; cursor: wait; } .link-button { margin-top: 16px; background: transparent; color: #623b12; padding-left: 0; }
+.notice { padding: 10px; border-radius: 6px; }.notice.success { background: #e4f4e7; }.notice.error { background: #fee9e7; }

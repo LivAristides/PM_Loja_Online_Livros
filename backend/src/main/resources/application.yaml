@@ -5,6 +5,11 @@ spring:
     default: local
   flyway:
     locations: classpath:db/migration
+  session:
+    store-type: jdbc
+    timeout: 30m
+    jdbc:
+      initialize-schema: never
 
 app:
   outbox:
@@ -14,6 +19,13 @@ app:
 
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        name: LIVRARIA_SESSION
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
 
 management:
   endpoints:

@@ -11,8 +11,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 1 | TASK-001 | Fundação | P0 | - | DONE |
 | 2 | TASK-002 | Fundação | P0 | 001 | DONE |
 | 3 | TASK-003 | Fundação | P0 | 002 | DONE |
-| 4 | TASK-004 | Identidade | P0 | 003 | READY |
-| 5 | TASK-005 | Identidade | P0 | 004 | BLOCKED |
+| 4 | TASK-004 | Identidade | P0 | 003 | DONE |
+| 5 | TASK-005 | Identidade | P0 | 004 | READY |
 | 6 | TASK-006 | Identidade | P0 | 005 | BLOCKED |
 | 7 | TASK-007 | Checkpoint | P0 | 006 | BLOCKED |
 | 8 | TASK-008 | Catálogo | P0 | 007 | BLOCKED |
@@ -58,6 +58,9 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-004 - Identidade, sessão e papéis
 
 **Objetivo:** Implementar usuários, RBAC, sessão server-side, login/logout/bloqueio. **Depende:** 003. **Rastreia:** RF-001/013, RN-015, ADR-002. **Aceite:** cinco perfis respeitam menor privilégio; 5 falhas bloqueiam 15 min. **Testes:** auth e autorização API. **Allowed:** identity/security/frontend de acesso. **Forbidden:** catálogo, checkout, JWT. **DoD:** testes e revisão de segurança passam.
+
+**Status note:** DONE em 22/10/2026: autenticação por sessão persistida, cookie seguro por perfil, CSRF, RBAC e bloqueio temporário validados por testes de integração.
+
 
 ## TASK-005 - Conta, recuperação e consentimentos
 
