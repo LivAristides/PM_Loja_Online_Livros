@@ -21,7 +21,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 11 | TASK-011 | Catálogo | P0 | 009 | DONE |
 | 12 | TASK-012 | Checkpoint | P0 | 010,011 | DONE |
 | 13 | TASK-013 | Compra | P0 | 012 | DONE |
-| 14 | TASK-014 | Compra | P0 | 013 | BLOCKED |
+| 14 | TASK-014 | Compra | P0 | 013 | DONE |
 | 15 | TASK-015 | Compra | P0 | 014 | BLOCKED |
 | 16 | TASK-016 | Compra | P0 | 015 | BLOCKED |
 | 17 | TASK-017 | Compra | P0 | 016 | BLOCKED |
@@ -116,6 +116,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-014 - Pedido e reserva transacional
 
 **Objetivo:** Criar pedido, itens snapshot e reserva atômica de estoque. **Depende:** 013. **Rastreia:** RF-007/009, RN-003/008. **Aceite:** disputa última unidade cria um pedido somente. **Testes:** concorrência dedicada. **Allowed:** orders/checkout/inventory. **Forbidden:** gateway e status logísticos. **DoD:** integração concorrente passa.
+
+**Status note:** DONE em 25/10/2026: pedido em aguardando pagamento, snapshots imutáveis e reserva de estoque atômica foram validados por migração e teste concorrente da última unidade.
 
 ## TASK-015 - Pagamento simulado e webhook
 

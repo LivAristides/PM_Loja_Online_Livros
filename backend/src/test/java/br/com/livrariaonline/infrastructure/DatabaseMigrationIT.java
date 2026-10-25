@@ -39,6 +39,7 @@ class DatabaseMigrationIT {
                 "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '7' AND success = true",
                 Integer.class);
         Integer shippingMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '8' AND success = true", Integer.class);
+        Integer orderMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '9' AND success = true", Integer.class);
         String demoDataPolicy = jdbcTemplate.queryForObject(
                 "SELECT metadata_value FROM application_metadata WHERE metadata_key = 'demo_data_policy'",
                 String.class);
@@ -48,6 +49,7 @@ class DatabaseMigrationIT {
         String inventoryTable = jdbcTemplate.queryForObject("SELECT to_regclass('inventory_movement')", String.class);
         String cartTable = jdbcTemplate.queryForObject("SELECT to_regclass('shopping_cart')", String.class);
         String shippingTable = jdbcTemplate.queryForObject("SELECT to_regclass('shipping_zone')", String.class);
+        String orderTable = jdbcTemplate.queryForObject("SELECT to_regclass('customer_order')", String.class);
 
         assertThat(migrationCount).isEqualTo(1);
         assertThat(crossCuttingMigrationCount).isEqualTo(1);
@@ -57,6 +59,7 @@ class DatabaseMigrationIT {
         assertThat(catalogAdministrationMigrationCount).isEqualTo(1);
         assertThat(cartMigrationCount).isEqualTo(1);
         assertThat(shippingMigrationCount).isEqualTo(1);
+        assertThat(orderMigrationCount).isEqualTo(1);
         assertThat(demoDataPolicy).isEqualTo("no-personal-data");
         assertThat(outboxTable).isEqualTo("outbox_message");
         assertThat(auditTable).isEqualTo("audit_log");
@@ -64,5 +67,6 @@ class DatabaseMigrationIT {
         assertThat(inventoryTable).isEqualTo("inventory_movement");
         assertThat(cartTable).isEqualTo("shopping_cart");
         assertThat(shippingTable).isEqualTo("shipping_zone");
+        assertThat(orderTable).isEqualTo("customer_order");
     }
 }
