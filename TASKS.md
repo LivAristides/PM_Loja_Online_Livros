@@ -19,7 +19,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 9 | TASK-009 | Catálogo | P0 | 008 | DONE |
 | 10 | TASK-010 | Catálogo | P1 | 009 | DONE |
 | 11 | TASK-011 | Catálogo | P0 | 009 | DONE |
-| 12 | TASK-012 | Checkpoint | P0 | 010,011 | BLOCKED |
+| 12 | TASK-012 | Checkpoint | P0 | 010,011 | DONE |
 | 13 | TASK-013 | Compra | P0 | 012 | BLOCKED |
 | 14 | TASK-014 | Compra | P0 | 013 | BLOCKED |
 | 15 | TASK-015 | Compra | P0 | 014 | BLOCKED |
@@ -104,6 +104,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-012 - Checkpoint PHASE-02
 
 **Objetivo:** Validar catálogo e carrinho. **Depende:** 010,011. **Aceite:** regras ISBN/inativos/estoque e experiência responsiva passam. **Testes:** regressão da fase. **Allowed:** correções mínimas fase 02. **Forbidden:** checkout/pagamento. **DoD:** gates globais P0 passam.
+
+**Status note:** DONE em 25/10/2026: regressão de catálogo e carrinho, responsividade em 360 px e serviços Compose validados sem correções adicionais.
 
 ## TASK-013 - Frete configurável e snapshots de checkout
 
