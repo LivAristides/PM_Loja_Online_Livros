@@ -56,11 +56,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/actuator/health", "/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
                                 "/api/v1/auth/password-recovery", "/api/v1/auth/password-reset", "/api/v1/auth/admin-invitations/accept").permitAll()
                         .requestMatchers("/api/v1/books/**").permitAll()
+                        .requestMatchers("/api/v1/checkout/shipping-quote").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/auth/admin-invitations").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/identity/access/admin/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/identity/access/catalog/**").hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
                         .requestMatchers("/api/v1/admin/catalog/**", "/api/v1/admin/inventory/**")
                         .hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
+                        .requestMatchers("/api/v1/admin/settings/**", "/api/v1/admin/shipping-zones/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/identity/access/finance/**").hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
                         .requestMatchers("/api/v1/identity/access/support/**").hasAnyRole("GENERAL_ADMINISTRATOR", "SUPPORT")

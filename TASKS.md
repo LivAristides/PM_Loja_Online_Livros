@@ -20,7 +20,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 10 | TASK-010 | Catálogo | P1 | 009 | DONE |
 | 11 | TASK-011 | Catálogo | P0 | 009 | DONE |
 | 12 | TASK-012 | Checkpoint | P0 | 010,011 | DONE |
-| 13 | TASK-013 | Compra | P0 | 012 | BLOCKED |
+| 13 | TASK-013 | Compra | P0 | 012 | DONE |
 | 14 | TASK-014 | Compra | P0 | 013 | BLOCKED |
 | 15 | TASK-015 | Compra | P0 | 014 | BLOCKED |
 | 16 | TASK-016 | Compra | P0 | 015 | BLOCKED |
@@ -110,6 +110,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-013 - Frete configurável e snapshots de checkout
 
 **Objetivo:** Configurações da loja, zonas CEP e cálculo isolado. **Depende:** 012. **Rastreia:** RF-007/017, RN-008. **Aceite:** zonas e prazos configuráveis; cálculo é substituível. **Testes:** limites de CEP/snapshot. **Allowed:** shipping/settings/checkout DTO. **Forbidden:** pagamento/reserva. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: configurações institucionais, zonas de CEP e cotação isolada por porta substituível validadas sem criar pedidos, reserva ou pagamento.
 
 ## TASK-014 - Pedido e reserva transacional
 
