@@ -1,51 +1,24 @@
-import { FormEvent, StrictMode, useState } from 'react'
+import { FormEvent, StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
-type Notice = { kind: 'success' | 'error'; text: string } | null
-
-async function csrfToken() {
-  const response = await fetch(`${API_URL}/api/v1/auth/csrf`, { credentials: 'include' })
-  if (!response.ok) throw new Error('Não foi possível iniciar a sessão segura.')
-  return (await response.json()).token as string
-}
+const API_URL = import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
+type Book = { id: string; title: string; isbn13: string; price: number; publisher: string; available: boolean; coverUrl: string | null }
+type Detail = Book & { authors: { id: string; name: string }[]; categories: { id: string; name: string }[] }
+type Page = { content: Book[]; page: number; size: number; totalElements: number }
+type Filters = { q: string; author: string; publisher: string; category: string; minimumPrice: string; maximumPrice: string; available: boolean }
+const blankFilters: Filters = { q: '', author: '', publisher: '', category: '', minimumPrice: '', maximumPrice: '', available: false }
+function money(value: number) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) }
+function query(filters: Filters, page: number) { const params = new URLSearchParams({ page: String(page), size: '20' }); Object.entries(filters).forEach(([key, value]) => { if (value !== '' && value !== false) params.set(key, String(value)) }); return params.toString() }
 
 function App() {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [notice, setNotice] = useState<Notice>(null)
-  const [loading, setLoading] = useState(false)
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setLoading(true); setNotice(null)
-    const form = new FormData(event.currentTarget)
-    try {
-      const csrf = await csrfToken()
-      const payload = mode === 'login' ? { email: form.get('email'), password: form.get('password') }
-        : { name: form.get('name'), email: form.get('email'), password: form.get('password'), termsAccepted: form.get('termsAccepted') === 'on' }
-      const response = await fetch(`${API_URL}/api/v1/auth/${mode === 'login' ? 'login' : 'register'}`, {
-        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': csrf }, body: JSON.stringify(payload),
-      })
-      const body = await response.json()
-      if (!response.ok) throw new Error(body.message ?? 'Não foi possível concluir a solicitação.')
-      setNotice({ kind: 'success', text: mode === 'login' ? `Sessão iniciada para ${body.email}.` : 'Cadastro realizado. Agora faça login.' })
-      if (mode === 'register') setMode('login')
-    } catch (error) { setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'Ocorreu um erro inesperado.' })
-    } finally { setLoading(false) }
-  }
-  return <main className="access-page"><section className="access-card" aria-labelledby="access-title">
-    <p className="eyebrow">Livraria Online</p><h1 id="access-title">{mode === 'login' ? 'Acesse sua conta' : 'Crie sua conta'}</h1>
-    <p className="subtitle">Use seu e-mail e uma senha com pelo menos 12 caracteres.</p>
-    {notice && <p role="alert" className={`notice ${notice.kind}`}>{notice.text}</p>}
-    <form onSubmit={submit}>
-      {mode === 'register' && <label>Nome<input name="name" autoComplete="name" required maxLength={120} /></label>}
-      <label>E-mail<input name="email" type="email" autoComplete="email" required /></label>
-      <label>Senha<input name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={12} required /></label>
-      {mode === 'register' && <label className="consent"><input name="termsAccepted" type="checkbox" required /> Li e aceito os termos vigentes.</label>}
-      <button disabled={loading} type="submit">{loading ? 'Aguarde…' : mode === 'login' ? 'Entrar' : 'Cadastrar'}</button>
-    </form>
-    <button className="link-button" type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setNotice(null) }}>
-      {mode === 'login' ? 'Ainda não tenho uma conta' : 'Já tenho uma conta'}
-    </button>
-  </section></main>
+  const [filters, setFilters] = useState<Filters>(blankFilters); const [applied, setApplied] = useState<Filters>(blankFilters)
+  const [page, setPage] = useState(0); const [catalog, setCatalog] = useState<Page>({ content: [], page: 0, size: 20, totalElements: 0 })
+  const [detail, setDetail] = useState<Detail | null>(null); const [loading, setLoading] = useState(true); const [error, setError] = useState('')
+  useEffect(() => { const controller = new AbortController(); setLoading(true); setError(''); fetch(`${API_URL}/api/v1/books?${query(applied, page)}`, { signal: controller.signal }).then(async response => { if (!response.ok) throw new Error('Não foi possível carregar o catálogo.'); return response.json() }).then(setCatalog).catch(reason => { if (reason.name !== 'AbortError') setError(reason.message) }).finally(() => setLoading(false)); return () => controller.abort() }, [applied, page])
+  function apply(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setPage(0); setApplied(filters) }
+  async function openDetail(id: string) { setError(''); try { const response = await fetch(`${API_URL}/api/v1/books/${id}`); if (!response.ok) throw new Error('Livro indisponível.'); setDetail(await response.json()) } catch (reason) { setError(reason instanceof Error ? reason.message : 'Não foi possível abrir o livro.') } }
+  const totalPages = Math.max(1, Math.ceil(catalog.totalElements / catalog.size)); const change = (key: keyof Filters, value: string | boolean) => setFilters(current => ({ ...current, [key]: value }))
+  return <main><header className="site-header"><a className="brand" href="#catalogo">Livraria Online</a><p>Livros novos para a sua próxima leitura.</p></header><section className="hero" aria-labelledby="catalog-title"><div><p className="eyebrow">Catálogo</p><h1 id="catalog-title">Encontre seu próximo livro</h1><p>Pesquise por título, autor, ISBN-13 ou editora.</p></div></section><section id="catalogo" className="catalog-layout" aria-label="Catálogo de livros"><form className="filters" onSubmit={apply} aria-label="Filtros do catálogo"><label>Buscar<input value={filters.q} onChange={event => change('q', event.target.value)} placeholder="Título, autor, ISBN ou editora" /></label><div className="filter-grid"><label>Autor<input value={filters.author} onChange={event => change('author', event.target.value)} /></label><label>Editora<input value={filters.publisher} onChange={event => change('publisher', event.target.value)} /></label></div><label>Categoria<input value={filters.category} onChange={event => change('category', event.target.value)} /></label><div className="filter-grid"><label>Preço mínimo<input type="number" min="0" step="0.01" value={filters.minimumPrice} onChange={event => change('minimumPrice', event.target.value)} /></label><label>Preço máximo<input type="number" min="0" step="0.01" value={filters.maximumPrice} onChange={event => change('maximumPrice', event.target.value)} /></label></div><label className="check"><input type="checkbox" checked={filters.available} onChange={event => change('available', event.target.checked)} /> Somente disponíveis</label><div className="filter-actions"><button type="submit">Aplicar filtros</button><button type="button" className="secondary" onClick={() => { setFilters(blankFilters); setApplied(blankFilters); setPage(0) }}>Limpar</button></div></form><div className="results" aria-live="polite"><div className="results-heading"><h2>Livros</h2><p>{loading ? 'Buscando livros…' : `${catalog.totalElements} resultado${catalog.totalElements === 1 ? '' : 's'}`}</p></div>{error && <p className="notice error" role="alert">{error}</p>}{!loading && !error && catalog.content.length === 0 && <p className="empty">Nenhum livro foi encontrado com esses filtros.</p>}<div className="book-grid">{catalog.content.map(book => <article className="book-card" key={book.id}><div className="cover">{book.coverUrl ? <img src={`${API_URL}${book.coverUrl}`} alt={`Capa de ${book.title}`} /> : <span aria-hidden="true">Livro</span>}</div><div><p className="publisher">{book.publisher}</p><h3>{book.title}</h3><p className="isbn">ISBN {book.isbn13}</p><p className="price">{money(book.price)}</p><p className={book.available ? 'available' : 'unavailable'}>{book.available ? 'Disponível' : 'Indisponível'}</p><button className="secondary" onClick={() => openDetail(book.id)}>Ver detalhes<span className="sr-only"> de {book.title}</span></button></div></article>)}</div>{catalog.totalElements > catalog.size && <nav className="pagination" aria-label="Paginação do catálogo"><button className="secondary" disabled={page === 0} onClick={() => setPage(page - 1)}>Anterior</button><span>Página {page + 1} de {totalPages}</span><button className="secondary" disabled={page + 1 >= totalPages} onClick={() => setPage(page + 1)}>Próxima</button></nav>}</div></section>{detail && <div className="dialog-backdrop" role="presentation"><section className="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-title"><button className="close" aria-label="Fechar detalhes" onClick={() => setDetail(null)}>×</button><div className="detail-cover">{detail.coverUrl ? <img src={`${API_URL}${detail.coverUrl}`} alt={`Capa de ${detail.title}`} /> : <span aria-hidden="true">Livro</span>}</div><div><p className="publisher">{detail.publisher}</p><h2 id="detail-title">{detail.title}</h2><p className="price">{money(detail.price)}</p><p>{detail.available ? 'Disponível em estoque' : 'Indisponível no momento'}</p><dl><dt>ISBN-13</dt><dd>{detail.isbn13}</dd><dt>Autores</dt><dd>{detail.authors.map(author => author.name).join(', ') || 'Não informado'}</dd><dt>Categorias</dt><dd>{detail.categories.map(category => category.name).join(', ') || 'Não informada'}</dd></dl></div></section></div>}</main>
 }
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>)

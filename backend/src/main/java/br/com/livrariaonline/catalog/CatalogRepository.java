@@ -97,6 +97,58 @@ class CatalogRepository {
                         resultSet.getInt("height")), bookId).stream().findFirst();
     }
 
+    Optional<StoredCoverReference> findCoverReference(UUID bookId) {
+        return jdbcTemplate.query("SELECT storage_key, content_type, byte_size, width, height FROM catalog_book_image WHERE book_id = ?",
+                (resultSet, rowNumber) -> new StoredCoverReference(resultSet.getString("storage_key"),
+                        resultSet.getString("content_type"), resultSet.getInt("byte_size"), resultSet.getInt("width"),
+                        resultSet.getInt("height")), bookId).stream().findFirst();
+    }
+
+    List<PublicCatalogRow> searchPublicBooks(String term, String author, String publisher, String category,
+                                             BigDecimal minimumPrice, BigDecimal maximumPrice, boolean available,
+                                             int limit, int offset) {
+        String like = "%" + (term == null ? "" : term.trim().toLowerCase()) + "%";
+        String authorFilter = author == null ? "" : author.trim().toLowerCase();
+        String authorLike = "%" + authorFilter + "%";
+        String publisherLike = "%" + (publisher == null ? "" : publisher.trim().toLowerCase()) + "%";
+        String categoryFilter = category == null ? "" : category.trim().toLowerCase();
+        String categoryLike = "%" + categoryFilter + "%";
+        return jdbcTemplate.query("""
+                SELECT b.id, b.title, b.isbn13, b.price, p.name AS publisher_name,
+                       COALESCE(i.available_quantity, 0) AS available_quantity,
+                       EXISTS (SELECT 1 FROM catalog_book_image image WHERE image.book_id = b.id) AS has_cover
+                FROM catalog_book b JOIN catalog_publisher p ON p.id = b.publisher_id
+                LEFT JOIN catalog_inventory i ON i.book_id = b.id
+                WHERE b.active = TRUE AND p.active = TRUE AND b.price IS NOT NULL
+                  AND (lower(b.title) LIKE ? OR b.isbn13 LIKE ? OR lower(p.name) LIKE ?
+                       OR EXISTS (SELECT 1 FROM catalog_book_author ba JOIN catalog_author a ON a.id = ba.author_id
+                                  WHERE ba.book_id = b.id AND a.active = TRUE AND lower(a.name) LIKE ?))
+                  AND (? = '' OR EXISTS (SELECT 1 FROM catalog_book_author ba JOIN catalog_author a ON a.id = ba.author_id
+                                         WHERE ba.book_id = b.id AND a.active = TRUE AND lower(a.name) LIKE ?))
+                  AND lower(p.name) LIKE ?
+                  AND (? = '' OR EXISTS (SELECT 1 FROM catalog_book_category bc JOIN catalog_category c ON c.id = bc.category_id
+                                         WHERE bc.book_id = b.id AND c.active = TRUE AND lower(c.name) LIKE ?))
+                  AND (CAST(? AS numeric) IS NULL OR b.price >= ?) AND (CAST(? AS numeric) IS NULL OR b.price <= ?)
+                  AND (? = FALSE OR COALESCE(i.available_quantity, 0) > 0)
+                ORDER BY b.title, b.id LIMIT ? OFFSET ?
+                """, (resultSet, rowNumber) -> new PublicCatalogRow(resultSet.getObject("id", UUID.class), resultSet.getString("title"),
+                resultSet.getString("isbn13"), resultSet.getBigDecimal("price"), resultSet.getString("publisher_name"),
+                resultSet.getInt("available_quantity"), resultSet.getBoolean("has_cover")),
+                like, like.replace("%", "") + "%", like, like, authorFilter, authorLike, publisherLike,
+                categoryFilter, categoryLike,
+                minimumPrice, minimumPrice, maximumPrice, maximumPrice, available, limit, offset);
+    }
+
+    int countPublicBooks(String term, String author, String publisher, String category, BigDecimal minimumPrice,
+                         BigDecimal maximumPrice, boolean available) {
+        return searchPublicBooks(term, author, publisher, category, minimumPrice, maximumPrice, available,
+                Integer.MAX_VALUE, 0).size();
+    }
+
+    record StoredCoverReference(String storageKey, String contentType, int byteSize, int width, int height) { }
+    record PublicCatalogRow(UUID id, String title, String isbn13, BigDecimal price, String publisherName,
+                            int availableQuantity, boolean hasCover) { }
+
     Optional<String> replaceCover(UUID bookId, StoredCover cover) {
         Optional<String> previousKey = jdbcTemplate.query("SELECT storage_key FROM catalog_book_image WHERE book_id = ?",
                 (resultSet, rowNumber) -> resultSet.getString(1), bookId).stream().findFirst();

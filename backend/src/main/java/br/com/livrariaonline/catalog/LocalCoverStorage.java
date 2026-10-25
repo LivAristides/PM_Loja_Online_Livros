@@ -32,4 +32,11 @@ class LocalCoverStorage implements CoverStorage {
         if (!target.startsWith(root)) throw new IOException("Caminho de armazenamento inválido.");
         Files.deleteIfExists(target);
     }
+
+    @Override
+    public byte[] read(String storageKey) throws IOException {
+        Path target = root.resolve(storageKey).normalize();
+        if (!target.startsWith(root)) throw new IOException("Caminho de armazenamento inválido.");
+        return Files.readAllBytes(target);
+    }
 }

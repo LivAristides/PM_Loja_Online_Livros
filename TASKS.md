@@ -17,7 +17,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 7 | TASK-007 | Checkpoint | P0 | 005 | DONE |
 | 8 | TASK-008 | Catálogo | P0 | 007 | DONE |
 | 9 | TASK-009 | Catálogo | P0 | 008 | DONE |
-| 10 | TASK-010 | Catálogo | P1 | 009 | BLOCKED |
+| 10 | TASK-010 | Catálogo | P1 | 009 | DONE |
 | 11 | TASK-011 | Catálogo | P0 | 009 | BLOCKED |
 | 12 | TASK-012 | Checkpoint | P0 | 010,011 | BLOCKED |
 | 13 | TASK-013 | Compra | P0 | 012 | BLOCKED |
@@ -92,6 +92,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-010 - Catálogo público e busca
 
 **Objetivo:** Listagem paginada, busca/filtros e detalhe responsivo. **Depende:** 009. **Rastreia:** RF-004/005, RNF-001..004. **Aceite:** filtros funcionam e inativos não aparecem. **Testes:** API, UI e acessibilidade. **Allowed:** catalog público/frontend. **Forbidden:** avaliações/cupons/lista de desejos. **DoD:** p95/qualidade verificadas quando aplicável.
+
+**Status note:** DONE em 25/10/2026: API pública paginada e interface responsiva validadas por integração, lint/build e Docker Compose.
 
 ## TASK-011 - Carrinho
 
