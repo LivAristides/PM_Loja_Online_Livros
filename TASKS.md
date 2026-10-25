@@ -18,7 +18,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 8 | TASK-008 | Catálogo | P0 | 007 | DONE |
 | 9 | TASK-009 | Catálogo | P0 | 008 | DONE |
 | 10 | TASK-010 | Catálogo | P1 | 009 | DONE |
-| 11 | TASK-011 | Catálogo | P0 | 009 | BLOCKED |
+| 11 | TASK-011 | Catálogo | P0 | 009 | DONE |
 | 12 | TASK-012 | Checkpoint | P0 | 010,011 | BLOCKED |
 | 13 | TASK-013 | Compra | P0 | 012 | BLOCKED |
 | 14 | TASK-014 | Compra | P0 | 013 | BLOCKED |
@@ -98,6 +98,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-011 - Carrinho
 
 **Objetivo:** Criar carrinho persistente por cliente e operações de linha sem reserva. **Depende:** 009. **Rastreia:** RF-006, RN-003. **Aceite:** alteração de estoque gera aviso e não bloqueia unidade. **Testes:** serviço/API/UI. **Allowed:** cart/frontend. **Forbidden:** criação de pedido. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: carrinho persistente, operações de itens e aviso de disponibilidade validados sem reserva de estoque.
 
 ## TASK-012 - Checkpoint PHASE-02
 

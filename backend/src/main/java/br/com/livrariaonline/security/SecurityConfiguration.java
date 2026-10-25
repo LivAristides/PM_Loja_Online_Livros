@@ -61,6 +61,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/identity/access/catalog/**").hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
                         .requestMatchers("/api/v1/admin/catalog/**", "/api/v1/admin/inventory/**")
                         .hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
+                        .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/identity/access/finance/**").hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
                         .requestMatchers("/api/v1/identity/access/support/**").hasAnyRole("GENERAL_ADMINISTRATOR", "SUPPORT")
                         .requestMatchers("/api/v1/auth/session", "/api/v1/identity/**", "/api/v1/me/**", "/api/v1/addresses/**").authenticated()
