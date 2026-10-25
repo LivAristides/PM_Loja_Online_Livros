@@ -22,7 +22,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 12 | TASK-012 | Checkpoint | P0 | 010,011 | DONE |
 | 13 | TASK-013 | Compra | P0 | 012 | DONE |
 | 14 | TASK-014 | Compra | P0 | 013 | DONE |
-| 15 | TASK-015 | Compra | P0 | 014 | BLOCKED |
+| 15 | TASK-015 | Compra | P0 | 014 | DONE |
 | 16 | TASK-016 | Compra | P0 | 015 | BLOCKED |
 | 17 | TASK-017 | Compra | P0 | 016 | BLOCKED |
 | 18 | TASK-018 | Compra | P0 | 017 | BLOCKED |
@@ -124,6 +124,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-015 - Pagamento simulado e webhook
 
 **Objetivo:** Tentar PIX/cartão, validar assinatura e idempotência. **Depende:** 014. **Rastreia:** RF-008, RN-004/006/014, ADR-004/005. **Aceite:** máximo 3 cartão; um processamento; webhook repetido não duplica efeitos. **Testes:** API/webhook. **Allowed:** payments/adaptador simulado. **Forbidden:** provedor real. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: pagamentos PIX/cartão simulados, limite de cartão, exclusividade de processamento e webhook HMAC idempotente foram validados por integração.
 
 ## TASK-016 - Expiração e compensação
 

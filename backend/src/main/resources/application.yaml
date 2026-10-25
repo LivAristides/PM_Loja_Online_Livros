@@ -20,6 +20,8 @@ app:
     polling-delay-ms: ${OUTBOX_POLLING_DELAY_MS:5000}
     batch-size: ${OUTBOX_BATCH_SIZE:20}
     max-attempts: ${OUTBOX_MAX_ATTEMPTS:3}
+  payments:
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET:development-only-payment-webhook-secret}
 
 server:
   port: 8080

@@ -51,10 +51,11 @@ public class SecurityConfiguration {
         csrf.setCookieCustomizer(cookie -> cookie.sameSite("Lax").path("/"));
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrfConfigurer -> csrfConfigurer.csrfTokenRepository(csrf))
+                .csrf(csrfConfigurer -> csrfConfigurer.csrfTokenRepository(csrf).ignoringRequestMatchers("/api/v1/webhooks/payments"))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
                                 "/api/v1/auth/password-recovery", "/api/v1/auth/password-reset", "/api/v1/auth/admin-invitations/accept").permitAll()
+                        .requestMatchers("/api/v1/webhooks/payments").permitAll()
                         .requestMatchers("/api/v1/books/**").permitAll()
                         .requestMatchers("/api/v1/checkout/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/auth/admin-invitations").hasRole("GENERAL_ADMINISTRATOR")
@@ -65,6 +66,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/admin/settings/**", "/api/v1/admin/shipping-zones/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/admin/privacy/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/v1/payments/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/identity/access/finance/**").hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
                         .requestMatchers("/api/v1/identity/access/support/**").hasAnyRole("GENERAL_ADMINISTRATOR", "SUPPORT")
                         .requestMatchers("/api/v1/auth/session", "/api/v1/identity/**", "/api/v1/me/**", "/api/v1/addresses/**", "/api/v1/privacy/**").authenticated()

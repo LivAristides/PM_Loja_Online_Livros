@@ -41,6 +41,7 @@ class DatabaseMigrationIT {
         Integer shippingMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '8' AND success = true", Integer.class);
         Integer orderMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '9' AND success = true", Integer.class);
         Integer privacyMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '10' AND success = true", Integer.class);
+        Integer paymentMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '11' AND success = true", Integer.class);
         String demoDataPolicy = jdbcTemplate.queryForObject(
                 "SELECT metadata_value FROM application_metadata WHERE metadata_key = 'demo_data_policy'",
                 String.class);
@@ -52,6 +53,7 @@ class DatabaseMigrationIT {
         String shippingTable = jdbcTemplate.queryForObject("SELECT to_regclass('shipping_zone')", String.class);
         String orderTable = jdbcTemplate.queryForObject("SELECT to_regclass('customer_order')", String.class);
         String privacyRetentionTable = jdbcTemplate.queryForObject("SELECT to_regclass('privacy_retention_policy')", String.class);
+        String paymentAttemptTable = jdbcTemplate.queryForObject("SELECT to_regclass('payment_attempt')", String.class);
 
         assertThat(migrationCount).isEqualTo(1);
         assertThat(crossCuttingMigrationCount).isEqualTo(1);
@@ -63,6 +65,7 @@ class DatabaseMigrationIT {
         assertThat(shippingMigrationCount).isEqualTo(1);
         assertThat(orderMigrationCount).isEqualTo(1);
         assertThat(privacyMigrationCount).isEqualTo(1);
+        assertThat(paymentMigrationCount).isEqualTo(1);
         assertThat(demoDataPolicy).isEqualTo("no-personal-data");
         assertThat(outboxTable).isEqualTo("outbox_message");
         assertThat(auditTable).isEqualTo("audit_log");
@@ -72,5 +75,6 @@ class DatabaseMigrationIT {
         assertThat(shippingTable).isEqualTo("shipping_zone");
         assertThat(orderTable).isEqualTo("customer_order");
         assertThat(privacyRetentionTable).isEqualTo("privacy_retention_policy");
+        assertThat(paymentAttemptTable).isEqualTo("payment_attempt");
     }
 }
