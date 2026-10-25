@@ -53,12 +53,14 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrfConfigurer -> csrfConfigurer.csrfTokenRepository(csrf))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/health", "/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/actuator/health", "/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
+                                "/api/v1/auth/password-recovery", "/api/v1/auth/password-reset", "/api/v1/auth/admin-invitations/accept").permitAll()
+                        .requestMatchers("/api/v1/auth/admin-invitations").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/identity/access/admin/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/identity/access/catalog/**").hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
                         .requestMatchers("/api/v1/identity/access/finance/**").hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
                         .requestMatchers("/api/v1/identity/access/support/**").hasAnyRole("GENERAL_ADMINISTRATOR", "SUPPORT")
-                        .requestMatchers("/api/v1/auth/session", "/api/v1/identity/**").authenticated()
+                        .requestMatchers("/api/v1/auth/session", "/api/v1/identity/**", "/api/v1/me/**", "/api/v1/addresses/**").authenticated()
                         .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionFixation(fixation -> fixation.changeSessionId()))
@@ -72,7 +74,7 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN", "X-Correlation-Id"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

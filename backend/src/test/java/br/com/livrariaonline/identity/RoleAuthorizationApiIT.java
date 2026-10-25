@@ -2,6 +2,8 @@ package br.com.livrariaonline.identity;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -31,5 +33,11 @@ class RoleAuthorizationApiIT {
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/v1/identity/access/admin/check").with(user("finance").roles("FINANCE")))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/v1/auth/admin-invitations").with(user("customer").roles("CUSTOMER")).with(csrf())
+                        .contentType("application/json").content("{\"email\":\"invite@example.test\",\"role\":\"FINANCE\"}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/v1/auth/admin-invitations").with(user("admin@example.test").roles("GENERAL_ADMINISTRATOR")).with(csrf())
+                        .contentType("application/json").content("{\"email\":\"invite@example.test\",\"role\":\"FINANCE\"}"))
+                .andExpect(status().isAccepted());
     }
 }

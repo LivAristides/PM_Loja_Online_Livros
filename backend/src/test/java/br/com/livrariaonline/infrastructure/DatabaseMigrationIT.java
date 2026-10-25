@@ -26,6 +26,9 @@ class DatabaseMigrationIT {
         Integer identityMigrationCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '3' AND success = true",
                 Integer.class);
+        Integer accountMigrationCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '4' AND success = true",
+                Integer.class);
         String demoDataPolicy = jdbcTemplate.queryForObject(
                 "SELECT metadata_value FROM application_metadata WHERE metadata_key = 'demo_data_policy'",
                 String.class);
@@ -35,6 +38,7 @@ class DatabaseMigrationIT {
         assertThat(migrationCount).isEqualTo(1);
         assertThat(crossCuttingMigrationCount).isEqualTo(1);
         assertThat(identityMigrationCount).isEqualTo(1);
+        assertThat(accountMigrationCount).isEqualTo(1);
         assertThat(demoDataPolicy).isEqualTo("no-personal-data");
         assertThat(outboxTable).isEqualTo("outbox_message");
         assertThat(auditTable).isEqualTo("audit_log");

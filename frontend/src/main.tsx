@@ -21,7 +21,7 @@ function App() {
     try {
       const csrf = await csrfToken()
       const payload = mode === 'login' ? { email: form.get('email'), password: form.get('password') }
-        : { name: form.get('name'), email: form.get('email'), password: form.get('password') }
+        : { name: form.get('name'), email: form.get('email'), password: form.get('password'), termsAccepted: form.get('termsAccepted') === 'on' }
       const response = await fetch(`${API_URL}/api/v1/auth/${mode === 'login' ? 'login' : 'register'}`, {
         method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': csrf }, body: JSON.stringify(payload),
       })
@@ -40,6 +40,7 @@ function App() {
       {mode === 'register' && <label>Nome<input name="name" autoComplete="name" required maxLength={120} /></label>}
       <label>E-mail<input name="email" type="email" autoComplete="email" required /></label>
       <label>Senha<input name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={12} required /></label>
+      {mode === 'register' && <label className="consent"><input name="termsAccepted" type="checkbox" required /> Li e aceito os termos vigentes.</label>}
       <button disabled={loading} type="submit">{loading ? 'Aguarde…' : mode === 'login' ? 'Entrar' : 'Cadastrar'}</button>
     </form>
     <button className="link-button" type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setNotice(null) }}>

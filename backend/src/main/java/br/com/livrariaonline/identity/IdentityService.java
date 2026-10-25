@@ -16,16 +16,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class IdentityService {
     private final IdentityRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final AccountRecoveryService accountRecoveryService;
 
-    public IdentityService(IdentityRepository repository, PasswordEncoder passwordEncoder) {
+    public IdentityService(IdentityRepository repository, PasswordEncoder passwordEncoder, AccountRecoveryService accountRecoveryService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.accountRecoveryService = accountRecoveryService;
     }
 
     @Transactional
-    public AppUser registerCustomer(String name, String email, String password) {
+    public AppUser registerCustomer(String name, String email, String password, String termsVersion) {
         try {
-            return repository.createCustomer(name, email, passwordEncoder.encode(password));
+            AppUser user = repository.createCustomer(name, email, passwordEncoder.encode(password));
+            repository.recordTermsConsent(user.id(), termsVersion);
+            return user;
         } catch (DuplicateKeyException exception) {
             throw new DuplicateEmailException();
         }
@@ -54,6 +58,8 @@ public class IdentityService {
     public void assertLoginAllowed(String email) {
         repository.findByEmail(email).ifPresent(this::assertLoginAllowed);
     }
+    public void requestPasswordRecovery(String email) { accountRecoveryService.requestPasswordReset(email); }
+    public void resetPassword(String token, String password) { accountRecoveryService.resetPassword(token, password); }
 
     private void assertLoginAllowed(AppUser user) {
         if (user.lockedUntil() != null && user.lockedUntil().isAfter(Instant.now())) {

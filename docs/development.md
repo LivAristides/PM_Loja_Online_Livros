@@ -45,3 +45,7 @@ As tabelas `audit_log` e `outbox_message` são infraestrutura técnica. Mensagen
 A API utiliza sessão no servidor, persistida no PostgreSQL. O navegador recebe apenas o cookie de sessão `LIVRARIA_SESSION` (HttpOnly e SameSite=Lax); nenhum token é armazenado pelo React. Em produção, defina `SESSION_COOKIE_SECURE=true` para enviar o cookie exclusivamente por HTTPS.
 
 Para ações que alteram estado, a interface busca `GET /api/v1/auth/csrf` e envia o token retornado no cabeçalho `X-XSRF-TOKEN`. O CORS local aceita apenas `http://localhost:5173` com credenciais.
+
+## Conta e recuperação
+
+O cadastro requer aceite dos termos na versão configurada por `TERMS_VERSION`; marketing é opcional e pode ser revogado em `/api/v1/me/consents/marketing`. Tokens de recuperação e convite ficam apenas como hash no PostgreSQL, expiram em 30 minutos e são inutilizados após uso. A redefinição de senha encerra todas as sessões ativas do usuário.

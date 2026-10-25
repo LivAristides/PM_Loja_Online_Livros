@@ -12,8 +12,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 2 | TASK-002 | Fundação | P0 | 001 | DONE |
 | 3 | TASK-003 | Fundação | P0 | 002 | DONE |
 | 4 | TASK-004 | Identidade | P0 | 003 | DONE |
-| 5 | TASK-005 | Identidade | P0 | 004 | READY |
-| 6 | TASK-006 | Identidade | P0 | 005 | BLOCKED |
+| 5 | TASK-005 | Identidade | P0 | 004 | DONE |
+| 6 | TASK-006 | Identidade | P0 | 005 | READY |
 | 7 | TASK-007 | Checkpoint | P0 | 006 | BLOCKED |
 | 8 | TASK-008 | Catálogo | P0 | 007 | BLOCKED |
 | 9 | TASK-009 | Catálogo | P0 | 008 | BLOCKED |
@@ -65,6 +65,9 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-005 - Conta, recuperação e consentimentos
 
 **Objetivo:** Perfil/endereço, troca de senha, convite administrativo, recuperação e aceite versionado. **Depende:** 004. **Rastreia:** RF-002/003, RN-016. **Aceite:** token único expira e invalida sessões; consentimento de marketing é opcional/revogável. **Testes:** fluxo de recuperação e autorização. **Allowed:** identity/customers/notificações correlatas. **Forbidden:** exportação/anonimização ainda não autorizadas. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: perfil/endereço, consentimentos versionados, recuperação com token de uso único e expiração, revogação de sessões e convite administrativo autorizado foram validados por testes de integração.
+
 
 ## TASK-006 - Direitos LGPD e retenção configurável
 

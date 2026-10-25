@@ -29,13 +29,17 @@ public class IdentityRepository {
     }
 
     public AppUser createCustomer(String name, String email, String passwordHash) {
+        return createUser(name, email, passwordHash, Role.CUSTOMER);
+    }
+
+    public AppUser createUser(String name, String email, String passwordHash, Role role) {
         UUID id = UUID.randomUUID();
         String normalizedEmail = normalizeEmail(email);
         jdbcTemplate.update("""
                 INSERT INTO app_user (id, name, email, password_hash)
                 VALUES (?, ?, ?, ?)
                 """, id, name.trim(), normalizedEmail, passwordHash);
-        jdbcTemplate.update("INSERT INTO app_user_role (user_id, role) VALUES (?, 'CUSTOMER')", id);
+        jdbcTemplate.update("INSERT INTO app_user_role (user_id, role) VALUES (?, ?)", id, role.name());
         return findByEmail(normalizedEmail).orElseThrow();
     }
 
@@ -44,6 +48,13 @@ public class IdentityRepository {
                 UPDATE app_user SET failed_login_attempts = 0, locked_until = NULL, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """, userId);
+    }
+
+    public void recordTermsConsent(UUID userId, String version) {
+        jdbcTemplate.update("""
+                INSERT INTO user_consent (id, user_id, consent_type, version, granted)
+                VALUES (?, ?, 'TERMS', ?, TRUE)
+                """, UUID.randomUUID(), userId, version);
     }
 
     public void recordFailedLogin(String email) {

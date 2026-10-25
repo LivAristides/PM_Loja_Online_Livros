@@ -27,7 +27,7 @@ class AuthenticationApiIT {
     void registersCustomerAndPersistsServerSideSessionOnLogin() throws Exception {
         String email = "customer-" + System.nanoTime() + "@example.test";
         mockMvc.perform(post("/api/v1/auth/register").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Cliente Teste\",\"email\":\"%s\",\"password\":\"senha-segura-123\"}".formatted(email)))
+                        .content("{\"name\":\"Cliente Teste\",\"email\":\"%s\",\"password\":\"senha-segura-123\",\"termsAccepted\":true}".formatted(email)))
                 .andExpect(status().isCreated());
 
         var login = mockMvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
@@ -47,7 +47,7 @@ class AuthenticationApiIT {
     void locksAccountForFifteenMinutesAfterFiveInvalidAttempts() throws Exception {
         String email = "locked-" + System.nanoTime() + "@example.test";
         mockMvc.perform(post("/api/v1/auth/register").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Conta Bloqueada\",\"email\":\"%s\",\"password\":\"senha-segura-123\"}".formatted(email)))
+                        .content("{\"name\":\"Conta Bloqueada\",\"email\":\"%s\",\"password\":\"senha-segura-123\",\"termsAccepted\":true}".formatted(email)))
                 .andExpect(status().isCreated());
         for (int attempt = 0; attempt < 5; attempt++) {
             mockMvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)

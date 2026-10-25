@@ -3,6 +3,7 @@ package br.com.livrariaonline.identity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -27,15 +28,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final IdentityService identityService;
     private final AuthenticationManager authenticationManager;
+    private final String termsVersion;
+    private final AdminInvitationService adminInvitationService;
 
-    public AuthController(IdentityService identityService, AuthenticationManager authenticationManager) {
+    public AuthController(IdentityService identityService, AuthenticationManager authenticationManager,
+                          @org.springframework.beans.factory.annotation.Value("${app.consent.terms-version}") String termsVersion,
+                          AdminInvitationService adminInvitationService) {
         this.identityService = identityService;
         this.authenticationManager = authenticationManager;
+        this.termsVersion = termsVersion;
+        this.adminInvitationService = adminInvitationService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegistrationRequest request) {
-        AppUser user = identityService.registerCustomer(request.name(), request.email(), request.password());
+        AppUser user = identityService.registerCustomer(request.name(), request.email(), request.password(), termsVersion);
         return ResponseEntity.status(HttpStatus.CREATED).body(AuthResponse.from(user));
     }
 
@@ -61,6 +68,30 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/password-recovery")
+    public ResponseEntity<Void> requestPasswordRecovery(@Valid @RequestBody RecoveryRequest request) {
+        identityService.requestPasswordRecovery(request.email());
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/password-reset")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetRequest request) {
+        identityService.resetPassword(request.token(), request.password());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/admin-invitations")
+    public ResponseEntity<Void> inviteAdministrator(@Valid @RequestBody AdminInvitationRequest request, Authentication authentication) {
+        adminInvitationService.invite(request.email(), request.role(), authentication.getName());
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/admin-invitations/accept")
+    public ResponseEntity<Void> acceptAdministratorInvitation(@Valid @RequestBody InvitationAcceptanceRequest request) {
+        adminInvitationService.accept(request.token(), request.name(), request.password());
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/csrf")
     public CsrfToken csrf(CsrfToken token) {
         return token;
@@ -74,8 +105,14 @@ public class AuthController {
 
     public record RegistrationRequest(@NotBlank @Size(max = 120) String name,
                                       @NotBlank @Email @Size(max = 254) String email,
-                                      @NotBlank @Size(min = 12, max = 72) String password) { }
+                                      @NotBlank @Size(min = 12, max = 72) String password,
+                                      @AssertTrue boolean termsAccepted) { }
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) { }
+    public record RecoveryRequest(@NotBlank @Email String email) { }
+    public record PasswordResetRequest(@NotBlank String token, @NotBlank @Size(min = 12, max = 72) String password) { }
+    public record AdminInvitationRequest(@NotBlank @Email String email, @jakarta.validation.constraints.NotNull Role role) { }
+    public record InvitationAcceptanceRequest(@NotBlank String token, @NotBlank @Size(max = 120) String name,
+                                               @NotBlank @Size(min = 12, max = 72) String password) { }
     public record AuthResponse(String id, String email, List<String> roles) {
         static AuthResponse from(AppUser user) {
             return new AuthResponse(user.id().toString(), user.email(), user.roles().stream().map(Role::name).toList());
