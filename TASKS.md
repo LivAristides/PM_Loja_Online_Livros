@@ -13,8 +13,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 3 | TASK-003 | Fundação | P0 | 002 | DONE |
 | 4 | TASK-004 | Identidade | P0 | 003 | DONE |
 | 5 | TASK-005 | Identidade | P0 | 004 | DONE |
-| 6 | TASK-006 | Identidade | P0 | 005 | READY |
-| 7 | TASK-007 | Checkpoint | P0 | 006 | BLOCKED |
+| 6 | TASK-006 | Privacidade | P0 | 014 | BLOCKED |
+| 7 | TASK-007 | Checkpoint | P0 | 005 | READY |
 | 8 | TASK-008 | Catálogo | P0 | 007 | BLOCKED |
 | 9 | TASK-009 | Catálogo | P0 | 008 | BLOCKED |
 | 10 | TASK-010 | Catálogo | P1 | 009 | BLOCKED |
@@ -71,11 +71,15 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 ## TASK-006 - Direitos LGPD e retenção configurável
 
-**Objetivo:** Exportação, solicitação de anonimização, bloqueio por pedido ativo e políticas de retenção. **Depende:** 005. **Rastreia:** RF-003, RN-016, ADR-006. **Aceite:** exporta somente dados do titular; anonimização preserva evidência sem PII. **Testes:** autorização e dados anonimizados. **Allowed:** customers/privacy/audit/config. **Forbidden:** anonimizar pedidos ativos ou apagar auditoria. **DoD:** testes e critérios passam.
+**Objetivo:** Exportação, solicitação de anonimização, bloqueio por pedido ativo e políticas de retenção. **Depende:** 014. **Rastreia:** RF-003, RN-016, ADR-006. **Aceite:** exporta somente dados do titular; anonimização preserva evidência sem PII. **Testes:** autorização e dados anonimizados. **Allowed:** customers/privacy/audit/config. **Forbidden:** anonimizar pedidos ativos ou apagar auditoria. **DoD:** testes e critérios passam.
+
+**Status note:** Reordenada em 25/10/2026 por decisão explícita: aguarda TASK-014, que fornece o contrato de pedidos necessário para bloquear anonimização durante pedidos ativos.
 
 ## TASK-007 - Checkpoint PHASE-01
 
-**Objetivo:** Validar fundação e identidade. **Depende:** 006. **Aceite:** build, migrações, auth, LGPD, auditoria e docs coerentes. **Testes:** todos da fase. **Allowed:** correções mínimas da fase e TASKS. **Forbidden:** funcionalidades de catálogo. **DoD:** gates globais P0 passam.
+**Objetivo:** Validar fundação e identidade disponível antes do catálogo. **Depende:** 005. **Aceite:** build, migrações, auth, auditoria e docs coerentes. **Testes:** todos da fase. **Allowed:** correções mínimas da fase e TASKS. **Forbidden:** funcionalidades de catálogo. **DoD:** gates globais P0 passam.
+
+**Status note:** Dependência ajustada em 25/10/2026, com autorização explícita, porque a privacidade completa (TASK-006) requer o domínio de pedidos da TASK-014.
 
 ## TASK-008 - Domínio de catálogo
 
