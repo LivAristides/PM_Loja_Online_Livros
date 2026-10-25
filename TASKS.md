@@ -13,7 +13,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 3 | TASK-003 | Fundação | P0 | 002 | DONE |
 | 4 | TASK-004 | Identidade | P0 | 003 | DONE |
 | 5 | TASK-005 | Identidade | P0 | 004 | DONE |
-| 6 | TASK-006 | Privacidade | P0 | 014 | BLOCKED |
+| 6 | TASK-006 | Privacidade | P0 | 014 | DONE |
 | 7 | TASK-007 | Checkpoint | P0 | 005 | DONE |
 | 8 | TASK-008 | Catálogo | P0 | 007 | DONE |
 | 9 | TASK-009 | Catálogo | P0 | 008 | DONE |
@@ -74,6 +74,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 **Objetivo:** Exportação, solicitação de anonimização, bloqueio por pedido ativo e políticas de retenção. **Depende:** 014. **Rastreia:** RF-003, RN-016, ADR-006. **Aceite:** exporta somente dados do titular; anonimização preserva evidência sem PII. **Testes:** autorização e dados anonimizados. **Allowed:** customers/privacy/audit/config. **Forbidden:** anonimizar pedidos ativos ou apagar auditoria. **DoD:** testes e critérios passam.
 
 **Status note:** Reordenada em 25/10/2026 por decisão explícita: aguarda TASK-014, que fornece o contrato de pedidos necessário para bloquear anonimização durante pedidos ativos.
+
+**Status note:** DONE em 25/10/2026: exportação do titular, anonimização com bloqueio por pedido ativo, preservação de auditoria e políticas de retenção configuráveis foram validadas por integração.
 
 ## TASK-007 - Checkpoint PHASE-01
 
