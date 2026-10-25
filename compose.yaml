@@ -34,8 +34,11 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
+      COVER_STORAGE_PATH: /data/covers
     ports:
       - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - cover-data:/data/covers
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,3 +57,4 @@ services:
 
 volumes:
   postgres-data:
+  cover-data:

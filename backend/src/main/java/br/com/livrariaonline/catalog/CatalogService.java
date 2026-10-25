@@ -73,9 +73,19 @@ class CatalogService {
         repository.deactivateCategory(id);
     }
 
+    @Transactional
+    void updatePublisherName(UUID id, String name) { repository.updatePublisherName(id, requiredName(name)); }
+    @Transactional
+    void updateAuthorName(UUID id, String name) { repository.updateAuthorName(id, requiredName(name)); }
+    @Transactional
+    void updateCategoryName(UUID id, String name) { repository.updateCategoryName(id, requiredName(name)); }
+    @Transactional
+    void updateBookTitle(UUID id, String title) { repository.updateBookTitle(id, requiredName(title)); }
+
     private CatalogBook catalogBook(CatalogBook book) {
         return new CatalogBook(book.id(), book.title(), book.isbn13(), book.publisher(),
-                repository.findAuthorsForBook(book.id()), repository.findCategoriesForBook(book.id()), book.active());
+                repository.findAuthorsForBook(book.id()), repository.findCategoriesForBook(book.id()), book.price(),
+                repository.findCoverForBook(book.id()).orElse(null), book.active());
     }
 
     private void validateAuthors(List<BookAuthor> authors) {

@@ -21,6 +21,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleInvalidInput(IllegalArgumentException exception) {
+        String correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);
+        ApiError error = new ApiError(Instant.now(), HttpStatus.BAD_REQUEST.value(), "invalid_request",
+                exception.getMessage(), correlationId);
+        return ResponseEntity.badRequest().body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpected(Exception exception) {
         String correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);

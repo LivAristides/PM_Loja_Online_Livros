@@ -14,6 +14,8 @@ spring:
 app:
   consent:
     terms-version: ${TERMS_VERSION:2026-01}
+  storage:
+    covers-path: ${COVER_STORAGE_PATH:storage/covers}
   outbox:
     polling-delay-ms: ${OUTBOX_POLLING_DELAY_MS:5000}
     batch-size: ${OUTBOX_BATCH_SIZE:20}

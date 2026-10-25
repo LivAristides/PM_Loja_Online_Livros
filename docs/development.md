@@ -49,3 +49,7 @@ Para ações que alteram estado, a interface busca `GET /api/v1/auth/csrf` e env
 ## Conta e recuperação
 
 O cadastro requer aceite dos termos na versão configurada por `TERMS_VERSION`; marketing é opcional e pode ser revogado em `/api/v1/me/consents/marketing`. Tokens de recuperação e convite ficam apenas como hash no PostgreSQL, expiram em 30 minutos e são inutilizados após uso. A redefinição de senha encerra todas as sessões ativas do usuário.
+
+## Capas de livros
+
+As capas são armazenadas no volume Docker `cover-data`; o PostgreSQL guarda apenas seus metadados técnicos. O upload administrativo aceita JPG, PNG ou WebP de até 2 MB e valida assinatura, tamanho e dimensões antes da gravação. Fora do Docker, `COVER_STORAGE_PATH` define o diretório local; o padrão é `storage/covers`.

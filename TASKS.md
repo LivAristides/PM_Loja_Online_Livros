@@ -16,7 +16,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 6 | TASK-006 | Privacidade | P0 | 014 | BLOCKED |
 | 7 | TASK-007 | Checkpoint | P0 | 005 | DONE |
 | 8 | TASK-008 | Catálogo | P0 | 007 | DONE |
-| 9 | TASK-009 | Catálogo | P0 | 008 | BLOCKED |
+| 9 | TASK-009 | Catálogo | P0 | 008 | DONE |
 | 10 | TASK-010 | Catálogo | P1 | 009 | BLOCKED |
 | 11 | TASK-011 | Catálogo | P0 | 009 | BLOCKED |
 | 12 | TASK-012 | Checkpoint | P0 | 010,011 | BLOCKED |

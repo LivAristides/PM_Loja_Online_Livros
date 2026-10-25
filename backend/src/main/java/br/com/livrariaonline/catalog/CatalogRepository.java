@@ -1,5 +1,6 @@
 package br.com.livrariaonline.catalog;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -67,7 +68,7 @@ class CatalogRepository {
 
     Optional<CatalogBook> findBook(UUID id) {
         return jdbcTemplate.query("""
-                SELECT b.id, b.title, b.isbn13, b.active, p.id AS publisher_id, p.name AS publisher_name,
+                SELECT b.id, b.title, b.isbn13, b.price, b.active, p.id AS publisher_id, p.name AS publisher_name,
                        p.active AS publisher_active
                 FROM catalog_book b JOIN catalog_publisher p ON p.id = b.publisher_id WHERE b.id = ?
                 """, this::mapBook, id).stream().findFirst();
@@ -89,6 +90,50 @@ class CatalogRepository {
                 """, this::mapCategory, bookId);
     }
 
+    Optional<CoverMetadata> findCoverForBook(UUID bookId) {
+        return jdbcTemplate.query("SELECT id, content_type, byte_size, width, height FROM catalog_book_image WHERE book_id = ?",
+                (resultSet, rowNumber) -> new CoverMetadata(resultSet.getObject("id", UUID.class),
+                        resultSet.getString("content_type"), resultSet.getInt("byte_size"), resultSet.getInt("width"),
+                        resultSet.getInt("height")), bookId).stream().findFirst();
+    }
+
+    Optional<String> replaceCover(UUID bookId, StoredCover cover) {
+        Optional<String> previousKey = jdbcTemplate.query("SELECT storage_key FROM catalog_book_image WHERE book_id = ?",
+                (resultSet, rowNumber) -> resultSet.getString(1), bookId).stream().findFirst();
+        jdbcTemplate.update("""
+                INSERT INTO catalog_book_image (id, book_id, storage_key, content_type, byte_size, width, height)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (book_id) DO UPDATE SET storage_key = EXCLUDED.storage_key,
+                    content_type = EXCLUDED.content_type, byte_size = EXCLUDED.byte_size, width = EXCLUDED.width,
+                    height = EXCLUDED.height, updated_at = CURRENT_TIMESTAMP
+                """, UUID.randomUUID(), bookId, cover.storageKey(), cover.contentType(), cover.byteSize(), cover.width(), cover.height());
+        return previousKey;
+    }
+
+    void updatePrice(UUID bookId, BigDecimal price) {
+        int updated = jdbcTemplate.update("UPDATE catalog_book SET price = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", price, bookId);
+        if (updated != 1) throw new CatalogService.CatalogEntityUnavailableException();
+    }
+
+    InventoryPosition adjustInventory(UUID bookId, int quantityDelta, String reason, String actorReference) {
+        jdbcTemplate.update("INSERT INTO catalog_inventory (book_id) VALUES (?) ON CONFLICT (book_id) DO NOTHING", bookId);
+        int updated = jdbcTemplate.update("""
+                UPDATE catalog_inventory SET available_quantity = available_quantity + ?, updated_at = CURRENT_TIMESTAMP
+                WHERE book_id = ? AND available_quantity + ? >= 0
+                """, quantityDelta, bookId, quantityDelta);
+        if (updated != 1) throw new InvalidInventoryAdjustmentException();
+        jdbcTemplate.update("INSERT INTO inventory_movement (id, book_id, quantity_delta, reason, actor_reference) VALUES (?, ?, ?, ?, ?)",
+                UUID.randomUUID(), bookId, quantityDelta, reason, actorReference);
+        return inventoryPosition(bookId);
+    }
+
+    InventoryPosition inventoryPosition(UUID bookId) {
+        return jdbcTemplate.query("SELECT book_id, available_quantity FROM catalog_inventory WHERE book_id = ?",
+                (resultSet, rowNumber) -> new InventoryPosition(resultSet.getObject("book_id", UUID.class),
+                        resultSet.getInt("available_quantity")), bookId).stream().findFirst()
+                .orElse(new InventoryPosition(bookId, 0));
+    }
+
     void deactivatePublisher(UUID id) {
         deactivate("catalog_publisher", id);
     }
@@ -105,8 +150,22 @@ class CatalogRepository {
         deactivate("catalog_book", id);
     }
 
+    void updatePublisherName(UUID id, String name) { updateName("catalog_publisher", id, name); }
+    void updateAuthorName(UUID id, String name) { updateName("catalog_author", id, name); }
+    void updateCategoryName(UUID id, String name) { updateName("catalog_category", id, name); }
+
+    void updateBookTitle(UUID id, String title) {
+        int updated = jdbcTemplate.update("UPDATE catalog_book SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", title, id);
+        if (updated != 1) throw new CatalogService.CatalogEntityUnavailableException();
+    }
+
     private void deactivate(String table, UUID id) {
         jdbcTemplate.update("UPDATE " + table + " SET active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE id = ?", id);
+    }
+
+    private void updateName(String table, UUID id, String name) {
+        int updated = jdbcTemplate.update("UPDATE " + table + " SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", name, id);
+        if (updated != 1) throw new CatalogService.CatalogEntityUnavailableException();
     }
 
     private CatalogPublisher mapPublisher(ResultSet resultSet, int rowNumber) throws SQLException {
@@ -128,6 +187,11 @@ class CatalogRepository {
         CatalogPublisher publisher = new CatalogPublisher(resultSet.getObject("publisher_id", UUID.class),
                 resultSet.getString("publisher_name"), resultSet.getBoolean("publisher_active"));
         return new CatalogBook(resultSet.getObject("id", UUID.class), resultSet.getString("title"),
-                resultSet.getString("isbn13"), publisher, List.of(), List.of(), resultSet.getBoolean("active"));
+                resultSet.getString("isbn13"), publisher, List.of(), List.of(), resultSet.getBigDecimal("price"),
+                null, resultSet.getBoolean("active"));
+    }
+
+    static final class InvalidInventoryAdjustmentException extends IllegalArgumentException {
+        InvalidInventoryAdjustmentException() { super("A movimentação deixaria o estoque negativo."); }
     }
 }
