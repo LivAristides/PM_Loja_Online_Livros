@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: livraria-online
+  profiles:
+    default: local
+  flyway:
+    locations: classpath:db/migration
+  session:
+    store-type: jdbc
+    timeout: 30m
+    jdbc:
+      initialize-schema: never
+
+app:
+  consent:
+    terms-version: ${TERMS_VERSION:2026-01}
+  storage:
+    covers-path: ${COVER_STORAGE_PATH:storage/covers}
+  outbox:
+    polling-delay-ms: ${OUTBOX_POLLING_DELAY_MS:5000}
+    batch-size: ${OUTBOX_BATCH_SIZE:20}
+    max-attempts: ${OUTBOX_MAX_ATTEMPTS:3}
+  payments:
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET:development-only-payment-webhook-secret}
+
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        name: LIVRARIA_SESSION
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -8,21 +8,21 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 | Ordem | TASK | Fase | Prioridade | Dependências | Estado |
 |---:|---|---|---|---|---|
-| 1 | TASK-001 | Fundação | P0 | - | READY |
-| 2 | TASK-002 | Fundação | P0 | 001 | BLOCKED |
-| 3 | TASK-003 | Fundação | P0 | 002 | BLOCKED |
-| 4 | TASK-004 | Identidade | P0 | 003 | BLOCKED |
-| 5 | TASK-005 | Identidade | P0 | 004 | BLOCKED |
-| 6 | TASK-006 | Identidade | P0 | 005 | BLOCKED |
-| 7 | TASK-007 | Checkpoint | P0 | 006 | BLOCKED |
-| 8 | TASK-008 | Catálogo | P0 | 007 | BLOCKED |
-| 9 | TASK-009 | Catálogo | P0 | 008 | BLOCKED |
-| 10 | TASK-010 | Catálogo | P1 | 009 | BLOCKED |
-| 11 | TASK-011 | Catálogo | P0 | 009 | BLOCKED |
-| 12 | TASK-012 | Checkpoint | P0 | 010,011 | BLOCKED |
-| 13 | TASK-013 | Compra | P0 | 012 | BLOCKED |
-| 14 | TASK-014 | Compra | P0 | 013 | BLOCKED |
-| 15 | TASK-015 | Compra | P0 | 014 | BLOCKED |
+| 1 | TASK-001 | Fundação | P0 | - | DONE |
+| 2 | TASK-002 | Fundação | P0 | 001 | DONE |
+| 3 | TASK-003 | Fundação | P0 | 002 | DONE |
+| 4 | TASK-004 | Identidade | P0 | 003 | DONE |
+| 5 | TASK-005 | Identidade | P0 | 004 | DONE |
+| 6 | TASK-006 | Privacidade | P0 | 014 | DONE |
+| 7 | TASK-007 | Checkpoint | P0 | 005 | DONE |
+| 8 | TASK-008 | Catálogo | P0 | 007 | DONE |
+| 9 | TASK-009 | Catálogo | P0 | 008 | DONE |
+| 10 | TASK-010 | Catálogo | P1 | 009 | DONE |
+| 11 | TASK-011 | Catálogo | P0 | 009 | DONE |
+| 12 | TASK-012 | Checkpoint | P0 | 010,011 | DONE |
+| 13 | TASK-013 | Compra | P0 | 012 | DONE |
+| 14 | TASK-014 | Compra | P0 | 013 | DONE |
+| 15 | TASK-015 | Compra | P0 | 014 | DONE |
 | 16 | TASK-016 | Compra | P0 | 015 | BLOCKED |
 | 17 | TASK-017 | Compra | P0 | 016 | BLOCKED |
 | 18 | TASK-018 | Compra | P0 | 017 | BLOCKED |
@@ -43,6 +43,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 **Objetivo:** Criar estrutura `backend/` e `frontend/`, Compose, convenções e configuração sem segredos. **Rastreia:** RNF-005/008, ADR-001. **Aceite:** uma instrução sobe os serviços vazios e documentação explica variáveis. **Testes/gates:** build base e Compose. **Allowed:** raiz, Docker, backend/frontend de scaffold, CI inicial. **Forbidden:** funcionalidades de domínio, credenciais reais. **DoD:** build/Compose/documentação passam.
 
+**Status note:** DONE em 19/10/2026: imagens criadas e serviços validados via Docker Compose; backend health, frontend e Mailpit responderam com sucesso.
+
 ## TASK-002 - Persistência, Flyway e dados de demonstração
 
 **Objetivo:** Configurar PostgreSQL, Flyway, perfis e carga segura de demonstração. **Depende:** 001. **Rastreia:** RNF-004/005. **Aceite:** migração vazia/versionada e banco sobe; sem dados reais. **Testes:** integração de conexão/migração. **Allowed:** backend de infraestrutura, Compose, docs. **Forbidden:** entidades de domínio final, seeds com senhas conhecidas sem troca obrigatória. **DoD:** migração e teste passam.
@@ -51,21 +53,35 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 **Objetivo:** Implementar tratamento de erro, correlação, auditoria básica, outbox e agendamento seguro. **Depende:** 002. **Rastreia:** RF-018, RNF-007, ADR-003. **Aceite:** mensagem sobrevive reinício e falha é registrável. **Testes:** unitário/integrado de outbox. **Allowed:** shared/outbox/audit/config. **Forbidden:** regras de pedidos/pagamento. **DoD:** gates aplicáveis passam.
 
+**Status note:** DONE em 19/10/2026: outbox persistente, auditoria básica, correlação e tratamento seguro de erro implementados; testes unitários e de integração passaram contra o PostgreSQL do Compose.
+
 ## TASK-004 - Identidade, sessão e papéis
 
 **Objetivo:** Implementar usuários, RBAC, sessão server-side, login/logout/bloqueio. **Depende:** 003. **Rastreia:** RF-001/013, RN-015, ADR-002. **Aceite:** cinco perfis respeitam menor privilégio; 5 falhas bloqueiam 15 min. **Testes:** auth e autorização API. **Allowed:** identity/security/frontend de acesso. **Forbidden:** catálogo, checkout, JWT. **DoD:** testes e revisão de segurança passam.
+
+**Status note:** DONE em 22/10/2026: autenticação por sessão persistida, cookie seguro por perfil, CSRF, RBAC e bloqueio temporário validados por testes de integração.
+
 
 ## TASK-005 - Conta, recuperação e consentimentos
 
 **Objetivo:** Perfil/endereço, troca de senha, convite administrativo, recuperação e aceite versionado. **Depende:** 004. **Rastreia:** RF-002/003, RN-016. **Aceite:** token único expira e invalida sessões; consentimento de marketing é opcional/revogável. **Testes:** fluxo de recuperação e autorização. **Allowed:** identity/customers/notificações correlatas. **Forbidden:** exportação/anonimização ainda não autorizadas. **DoD:** gates passam.
 
+**Status note:** DONE em 25/10/2026: perfil/endereço, consentimentos versionados, recuperação com token de uso único e expiração, revogação de sessões e convite administrativo autorizado foram validados por testes de integração.
+
+
 ## TASK-006 - Direitos LGPD e retenção configurável
 
-**Objetivo:** Exportação, solicitação de anonimização, bloqueio por pedido ativo e políticas de retenção. **Depende:** 005. **Rastreia:** RF-003, RN-016, ADR-006. **Aceite:** exporta somente dados do titular; anonimização preserva evidência sem PII. **Testes:** autorização e dados anonimizados. **Allowed:** customers/privacy/audit/config. **Forbidden:** anonimizar pedidos ativos ou apagar auditoria. **DoD:** testes e critérios passam.
+**Objetivo:** Exportação, solicitação de anonimização, bloqueio por pedido ativo e políticas de retenção. **Depende:** 014. **Rastreia:** RF-003, RN-016, ADR-006. **Aceite:** exporta somente dados do titular; anonimização preserva evidência sem PII. **Testes:** autorização e dados anonimizados. **Allowed:** customers/privacy/audit/config. **Forbidden:** anonimizar pedidos ativos ou apagar auditoria. **DoD:** testes e critérios passam.
+
+**Status note:** Reordenada em 25/10/2026 por decisão explícita: aguarda TASK-014, que fornece o contrato de pedidos necessário para bloquear anonimização durante pedidos ativos.
+
+**Status note:** DONE em 25/10/2026: exportação do titular, anonimização com bloqueio por pedido ativo, preservação de auditoria e políticas de retenção configuráveis foram validadas por integração.
 
 ## TASK-007 - Checkpoint PHASE-01
 
-**Objetivo:** Validar fundação e identidade. **Depende:** 006. **Aceite:** build, migrações, auth, LGPD, auditoria e docs coerentes. **Testes:** todos da fase. **Allowed:** correções mínimas da fase e TASKS. **Forbidden:** funcionalidades de catálogo. **DoD:** gates globais P0 passam.
+**Objetivo:** Validar fundação e identidade disponível antes do catálogo. **Depende:** 005. **Aceite:** build, migrações, auth, auditoria e docs coerentes. **Testes:** todos da fase. **Allowed:** correções mínimas da fase e TASKS. **Forbidden:** funcionalidades de catálogo. **DoD:** gates globais P0 passam.
+
+**Status note:** Dependência ajustada em 25/10/2026, com autorização explícita, porque a privacidade completa (TASK-006) requer o domínio de pedidos da TASK-014.
 
 ## TASK-008 - Domínio de catálogo
 
@@ -79,25 +95,37 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 **Objetivo:** Listagem paginada, busca/filtros e detalhe responsivo. **Depende:** 009. **Rastreia:** RF-004/005, RNF-001..004. **Aceite:** filtros funcionam e inativos não aparecem. **Testes:** API, UI e acessibilidade. **Allowed:** catalog público/frontend. **Forbidden:** avaliações/cupons/lista de desejos. **DoD:** p95/qualidade verificadas quando aplicável.
 
+**Status note:** DONE em 25/10/2026: API pública paginada e interface responsiva validadas por integração, lint/build e Docker Compose.
+
 ## TASK-011 - Carrinho
 
 **Objetivo:** Criar carrinho persistente por cliente e operações de linha sem reserva. **Depende:** 009. **Rastreia:** RF-006, RN-003. **Aceite:** alteração de estoque gera aviso e não bloqueia unidade. **Testes:** serviço/API/UI. **Allowed:** cart/frontend. **Forbidden:** criação de pedido. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: carrinho persistente, operações de itens e aviso de disponibilidade validados sem reserva de estoque.
 
 ## TASK-012 - Checkpoint PHASE-02
 
 **Objetivo:** Validar catálogo e carrinho. **Depende:** 010,011. **Aceite:** regras ISBN/inativos/estoque e experiência responsiva passam. **Testes:** regressão da fase. **Allowed:** correções mínimas fase 02. **Forbidden:** checkout/pagamento. **DoD:** gates globais P0 passam.
 
+**Status note:** DONE em 25/10/2026: regressão de catálogo e carrinho, responsividade em 360 px e serviços Compose validados sem correções adicionais.
+
 ## TASK-013 - Frete configurável e snapshots de checkout
 
 **Objetivo:** Configurações da loja, zonas CEP e cálculo isolado. **Depende:** 012. **Rastreia:** RF-007/017, RN-008. **Aceite:** zonas e prazos configuráveis; cálculo é substituível. **Testes:** limites de CEP/snapshot. **Allowed:** shipping/settings/checkout DTO. **Forbidden:** pagamento/reserva. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: configurações institucionais, zonas de CEP e cotação isolada por porta substituível validadas sem criar pedidos, reserva ou pagamento.
 
 ## TASK-014 - Pedido e reserva transacional
 
 **Objetivo:** Criar pedido, itens snapshot e reserva atômica de estoque. **Depende:** 013. **Rastreia:** RF-007/009, RN-003/008. **Aceite:** disputa última unidade cria um pedido somente. **Testes:** concorrência dedicada. **Allowed:** orders/checkout/inventory. **Forbidden:** gateway e status logísticos. **DoD:** integração concorrente passa.
 
+**Status note:** DONE em 25/10/2026: pedido em aguardando pagamento, snapshots imutáveis e reserva de estoque atômica foram validados por migração e teste concorrente da última unidade.
+
 ## TASK-015 - Pagamento simulado e webhook
 
 **Objetivo:** Tentar PIX/cartão, validar assinatura e idempotência. **Depende:** 014. **Rastreia:** RF-008, RN-004/006/014, ADR-004/005. **Aceite:** máximo 3 cartão; um processamento; webhook repetido não duplica efeitos. **Testes:** API/webhook. **Allowed:** payments/adaptador simulado. **Forbidden:** provedor real. **DoD:** gates passam.
+
+**Status note:** DONE em 25/10/2026: pagamentos PIX/cartão simulados, limite de cartão, exclusividade de processamento e webhook HMAC idempotente foram validados por integração.
 
 ## TASK-016 - Expiração e compensação
 
