@@ -23,7 +23,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 13 | TASK-013 | Compra | P0 | 012 | DONE |
 | 14 | TASK-014 | Compra | P0 | 013 | DONE |
 | 15 | TASK-015 | Compra | P0 | 014 | DONE |
-| 16 | TASK-016 | Compra | P0 | 015 | BLOCKED |
+| 16 | TASK-016 | Compra | P0 | 015 | DONE |
 | 17 | TASK-017 | Compra | P0 | 016 | BLOCKED |
 | 18 | TASK-018 | Compra | P0 | 017 | BLOCKED |
 | 19 | TASK-019 | Compra | P0 | 018 | BLOCKED |
@@ -130,6 +130,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-016 - Expiração e compensação
 
 **Objetivo:** Expirar reservas, liberar estoque e processar pagamento tardio/estorno idempotente. **Depende:** 015. **Rastreia:** RF-009/018, RN-004/007. **Aceite:** expiração reiniciável libera uma vez; tardio não reativa pedido. **Testes:** jobs/reinício. **Allowed:** payments/orders/inventory/outbox. **Forbidden:** alterar prazos sem configuração. **DoD:** gates passam.
+
+**Status note:** DONE em 03/11/2026: expiração persistente de reservas, devolução idempotente de estoque e compensação de pagamento tardio validadas por integração, incluindo reinício lógico do consumidor de outbox.
 
 ## TASK-017 - Pedidos do cliente e cancelamento
 

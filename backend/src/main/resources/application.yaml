@@ -22,6 +22,9 @@ app:
     max-attempts: ${OUTBOX_MAX_ATTEMPTS:3}
   payments:
     webhook-secret: ${PAYMENT_WEBHOOK_SECRET:development-only-payment-webhook-secret}
+    pix-reservation-minutes: ${PIX_RESERVATION_MINUTES:30}
+    card-reservation-minutes: ${CARD_RESERVATION_MINUTES:15}
+    expiration-polling-delay-ms: ${PAYMENT_EXPIRATION_POLLING_DELAY_MS:5000}
 
 server:
   port: 8080
