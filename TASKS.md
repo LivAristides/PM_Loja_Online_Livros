@@ -24,7 +24,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 14 | TASK-014 | Compra | P0 | 013 | DONE |
 | 15 | TASK-015 | Compra | P0 | 014 | DONE |
 | 16 | TASK-016 | Compra | P0 | 015 | DONE |
-| 17 | TASK-017 | Compra | P0 | 016 | BLOCKED |
+| 17 | TASK-017 | Compra | P0 | 016 | DONE |
 | 18 | TASK-018 | Compra | P0 | 017 | BLOCKED |
 | 19 | TASK-019 | Compra | P0 | 018 | BLOCKED |
 | 20 | TASK-020 | Checkpoint | P0 | 019 | BLOCKED |
@@ -136,6 +136,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-017 - Pedidos do cliente e cancelamento
 
 **Objetivo:** Histórico, transições, cancelamento e correção restrita de endereço. **Depende:** 016. **Rastreia:** RF-010, RN-005/008..010. **Aceite:** transição inválida é rejeitada e histórico registra origem/motivo. **Testes:** máquina de estados/API/UI. **Allowed:** orders/customers frontend. **Forbidden:** retorno/devolução. **DoD:** gates passam.
+
+**Status note:** DONE em 04/11/2026: histórico persistente de estados, confirmação por pagamento aprovado, cancelamento idempotente do cliente e correção de endereço por atendimento na mesma zona foram validados por integração.
 
 ## TASK-018 - Logística e rastreio simulado
 
