@@ -27,7 +27,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 17 | TASK-017 | Compra | P0 | 016 | DONE |
 | 18 | TASK-018 | Compra | P0 | 017 | DONE |
 | 19 | TASK-019 | Compra | P0 | 018 | DONE |
-| 20 | TASK-020 | Checkpoint | P0 | 019 | BLOCKED |
+| 20 | TASK-020 | Checkpoint | P0 | 019 | DONE |
 | 21 | TASK-021 | Operação | P0 | 020 | BLOCKED |
 | 22 | TASK-022 | Operação | P0 | 021 | BLOCKED |
 | 23 | TASK-023 | Operação | P1 | 022 | BLOCKED |
@@ -152,6 +152,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-020 - Checkpoint PHASE-03
 
 **Objetivo:** Validar compra ponta a ponta. **Depende:** 019. **Aceite:** checkout concorrente, pagamento, expiração, cancelamento, rastreio e e-mail passam. **Testes:** E2E/regressão. **Allowed:** correções mínimas fase 03. **Forbidden:** devolução/admin não relacionados. **DoD:** gates globais P0 passam.
+
+**Status note:** DONE em 05/11/2026: regressão isolada aprovou checkout concorrente, pagamento, expiração, cancelamento, rastreio e notificações; frontend validado por lint e build. Não há runner E2E configurado nesta etapa.
 
 ## TASK-021 - Solicitação e tratamento de devolução
 
