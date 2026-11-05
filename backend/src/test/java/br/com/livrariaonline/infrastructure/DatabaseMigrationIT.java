@@ -46,6 +46,7 @@ class DatabaseMigrationIT {
         Integer orderHistoryMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '13' AND success = true", Integer.class);
         Integer shipmentMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '14' AND success = true", Integer.class);
         Integer notificationMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '15' AND success = true", Integer.class);
+        Integer returnMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '16' AND success = true", Integer.class);
         String demoDataPolicy = jdbcTemplate.queryForObject(
                 "SELECT metadata_value FROM application_metadata WHERE metadata_key = 'demo_data_policy'",
                 String.class);
@@ -62,6 +63,7 @@ class DatabaseMigrationIT {
         String orderHistoryTable = jdbcTemplate.queryForObject("SELECT to_regclass('customer_order_status_history')", String.class);
         String shipmentTable = jdbcTemplate.queryForObject("SELECT to_regclass('shipment')", String.class);
         String notificationDeliveryTable = jdbcTemplate.queryForObject("SELECT to_regclass('notification_delivery')", String.class);
+        String returnRequestTable = jdbcTemplate.queryForObject("SELECT to_regclass('return_request')", String.class);
 
         assertThat(migrationCount).isEqualTo(1);
         assertThat(crossCuttingMigrationCount).isEqualTo(1);
@@ -78,6 +80,7 @@ class DatabaseMigrationIT {
         assertThat(orderHistoryMigrationCount).isEqualTo(1);
         assertThat(shipmentMigrationCount).isEqualTo(1);
         assertThat(notificationMigrationCount).isEqualTo(1);
+        assertThat(returnMigrationCount).isEqualTo(1);
         assertThat(demoDataPolicy).isEqualTo("no-personal-data");
         assertThat(outboxTable).isEqualTo("outbox_message");
         assertThat(auditTable).isEqualTo("audit_log");
@@ -92,5 +95,6 @@ class DatabaseMigrationIT {
         assertThat(orderHistoryTable).isEqualTo("customer_order_status_history");
         assertThat(shipmentTable).isEqualTo("shipment");
         assertThat(notificationDeliveryTable).isEqualTo("notification_delivery");
+        assertThat(returnRequestTable).isEqualTo("return_request");
     }
 }

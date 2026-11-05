@@ -28,7 +28,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 18 | TASK-018 | Compra | P0 | 017 | DONE |
 | 19 | TASK-019 | Compra | P0 | 018 | DONE |
 | 20 | TASK-020 | Checkpoint | P0 | 019 | DONE |
-| 21 | TASK-021 | Operação | P0 | 020 | BLOCKED |
+| 21 | TASK-021 | Operação | P0 | 020 | DONE |
 | 22 | TASK-022 | Operação | P0 | 021 | BLOCKED |
 | 23 | TASK-023 | Operação | P1 | 022 | BLOCKED |
 | 24 | TASK-024 | Operação | P0 | 023 | BLOCKED |
@@ -158,6 +158,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-021 - Solicitação e tratamento de devolução
 
 **Objetivo:** Implementar devolução integral, prazos, aprovação/recusa e postagem simulada. **Depende:** 020. **Rastreia:** RF-011, RN-011. **Aceite:** motivos/prazos aplicados e recusa exige justificativa. **Testes:** regras e API. **Allowed:** returns/orders/shipping. **Forbidden:** devolução parcial. **DoD:** gates passam.
+
+**Status note:** DONE em 05/11/2026: devolução integral com motivos, prazos de 7/30 dias, decisão de atendimento com justificativa obrigatória na recusa e postagem simulada foi validada por API e integração.
 
 ## TASK-022 - Recebimento, reembolso e estoque de retorno
 
