@@ -26,7 +26,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 16 | TASK-016 | Compra | P0 | 015 | DONE |
 | 17 | TASK-017 | Compra | P0 | 016 | DONE |
 | 18 | TASK-018 | Compra | P0 | 017 | DONE |
-| 19 | TASK-019 | Compra | P0 | 018 | BLOCKED |
+| 19 | TASK-019 | Compra | P0 | 018 | DONE |
 | 20 | TASK-020 | Checkpoint | P0 | 019 | BLOCKED |
 | 21 | TASK-021 | Operação | P0 | 020 | BLOCKED |
 | 22 | TASK-022 | Operação | P0 | 021 | BLOCKED |
@@ -146,6 +146,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-019 - Notificações do ciclo de compra
 
 **Objetivo:** E-mails de teste assíncronos para eventos definidos. **Depende:** 018. **Rastreia:** RF-012, ADR-003/004. **Aceite:** falha não desfaz pedido e é reenviada. **Testes:** outbox/adaptador. **Allowed:** notifications/templates/outbox. **Forbidden:** e-mail real/campanhas. **DoD:** gates passam.
+
+**Status note:** DONE em 05/11/2026: notificações assíncronas de pagamento confirmado, cancelamento, envio e entrega usam outbox persistente e adaptador de e-mail de teste; entrega, falha isolada e repetição conforme política foram validadas por integração.
 
 ## TASK-020 - Checkpoint PHASE-03
 

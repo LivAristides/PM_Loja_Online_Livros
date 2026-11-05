@@ -49,6 +49,7 @@ class OrderApiIT {
                 .andExpect(jsonPath("$.history[1].reason").value("Desisti da compra"));
         assertThat(value("SELECT available_quantity FROM catalog_inventory WHERE book_id = ?", Integer.class, order.bookId())).isEqualTo(1);
         assertThat(value("SELECT COUNT(*) FROM inventory_movement WHERE book_id = ? AND reason = 'ORDER_CANCELLATION'", Integer.class, order.bookId())).isEqualTo(1);
+        assertThat(value("SELECT COUNT(*) FROM outbox_message WHERE message_type = 'ORDER_NOTIFICATION' AND payload->>'eventType' = 'ORDER_CANCELLED' AND payload->>'orderId' = ?", Integer.class, order.id().toString())).isEqualTo(1);
         mockMvc.perform(post("/api/v1/orders/{id}/cancel", order.id()).with(user(customer.email()).roles("CUSTOMER")).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Transição de pedido inválida."));
@@ -127,6 +128,7 @@ class OrderApiIT {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("DELIVERED"))
                 .andExpect(jsonPath("$.shipment.deliveredAt").exists());
         assertThat(value("SELECT COUNT(*) FROM audit_log WHERE target_reference = ? AND action = 'ORDER_LOGISTICS_UPDATED'", Integer.class, order.id().toString())).isEqualTo(3);
+        assertThat(value("SELECT COUNT(*) FROM outbox_message WHERE message_type = 'ORDER_NOTIFICATION' AND payload->>'orderId' = ?", Integer.class, order.id().toString())).isEqualTo(2);
     }
 
     private AppUser customer(String suffix) { return identityService.registerCustomer("Cliente Pedido", "order-" + suffix + "-" + UUID.randomUUID() + "@example.test", "senha-segura-123", "v1"); }

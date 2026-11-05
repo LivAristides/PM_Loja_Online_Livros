@@ -2,6 +2,8 @@ package br.com.livrariaonline.payments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import br.com.livrariaonline.notifications.OrderNotificationOutbox;
+import br.com.livrariaonline.notifications.OrderNotificationType;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
@@ -20,10 +22,12 @@ class PaymentService {
     private final ObjectMapper objectMapper;
     private final String webhookSecret;
     private final OutboxRepository outboxRepository;
+    private final OrderNotificationOutbox notificationOutbox;
 
     PaymentService(PaymentRepository repository, SimulatedPaymentGateway gateway, ObjectMapper objectMapper,
-                   OutboxRepository outboxRepository, @Value("${app.payments.webhook-secret}") String webhookSecret) {
-        this.repository = repository; this.gateway = gateway; this.objectMapper = objectMapper; this.outboxRepository = outboxRepository; this.webhookSecret = webhookSecret;
+                   OutboxRepository outboxRepository, OrderNotificationOutbox notificationOutbox,
+                   @Value("${app.payments.webhook-secret}") String webhookSecret) {
+        this.repository = repository; this.gateway = gateway; this.objectMapper = objectMapper; this.outboxRepository = outboxRepository; this.notificationOutbox = notificationOutbox; this.webhookSecret = webhookSecret;
     }
 
     @Transactional
@@ -54,6 +58,7 @@ class PaymentService {
         if (attempt.status() != PaymentStatus.PROCESSING) throw new InvalidWebhookStatusException();
         if (event.status() != PaymentStatus.APPROVED && event.status() != PaymentStatus.DECLINED) throw new InvalidWebhookStatusException();
         repository.updateStatus(attempt.id(), event.status());
+        if (event.status() == PaymentStatus.APPROVED) notificationOutbox.publish(attempt.orderId(), OrderNotificationType.PAYMENT_CONFIRMED);
         return true;
     }
 

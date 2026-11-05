@@ -2,6 +2,8 @@ package br.com.livrariaonline.orders;
 
 import br.com.livrariaonline.audit.AuditEvent;
 import br.com.livrariaonline.audit.AuditLogService;
+import br.com.livrariaonline.notifications.OrderNotificationOutbox;
+import br.com.livrariaonline.notifications.OrderNotificationType;
 import br.com.livrariaonline.shipping.ShippingCalculator;
 import br.com.livrariaonline.shipping.ShippingQuote;
 import java.util.List;
@@ -15,9 +17,10 @@ class OrderService {
     private final OrderRepository repository;
     private final ShippingCalculator shippingCalculator;
     private final AuditLogService audit;
+    private final OrderNotificationOutbox notificationOutbox;
 
-    OrderService(OrderRepository repository, ShippingCalculator shippingCalculator, AuditLogService audit) {
-        this.repository = repository; this.shippingCalculator = shippingCalculator; this.audit = audit;
+    OrderService(OrderRepository repository, ShippingCalculator shippingCalculator, AuditLogService audit, OrderNotificationOutbox notificationOutbox) {
+        this.repository = repository; this.shippingCalculator = shippingCalculator; this.audit = audit; this.notificationOutbox = notificationOutbox;
     }
 
     List<CustomerOrderSummary> list(String customerEmail) { return repository.summaries(customerEmail); }
@@ -31,6 +34,7 @@ class OrderService {
         repository.transitionContext("CUSTOMER", customerEmail, reason);
         repository.cancel(orderId);
         repository.releaseStock(orderId, customerEmail);
+        notificationOutbox.publish(orderId, OrderNotificationType.ORDER_CANCELLED);
         audit.record(new AuditEvent("CUSTOMER", customerEmail, "ORDER_CANCELLED", "CUSTOMER_ORDER", orderId.toString(), UUID.randomUUID(),
                 "{\"reason\":\"customer_request\"}"));
         return repository.findOwned(customerEmail, orderId);
@@ -67,6 +71,8 @@ class OrderService {
         if (targetStatus == OrderStatus.DELIVERED) repository.markDelivered(orderId);
         repository.transitionContext("SUPPORT", actor, transitionReason(targetStatus));
         repository.updateStatus(orderId, targetStatus);
+        if (targetStatus == OrderStatus.SHIPPED) notificationOutbox.publish(orderId, OrderNotificationType.ORDER_SHIPPED);
+        if (targetStatus == OrderStatus.DELIVERED) notificationOutbox.publish(orderId, OrderNotificationType.ORDER_DELIVERED);
         audit.record(new AuditEvent("SUPPORT", actor, "ORDER_LOGISTICS_UPDATED", "CUSTOMER_ORDER", orderId.toString(), UUID.randomUUID(),
                 "{\"status\":\"" + targetStatus.name() + "\"}"));
         return repository.findForUpdate(orderId);
