@@ -47,13 +47,17 @@ class OrderRepository {
                 WHERE order_id = ? ORDER BY title
                 """, (rs, row) -> new OrderItem(rs.getObject("book_id", UUID.class), rs.getString("title"), rs.getString("isbn13"),
                 rs.getBigDecimal("unit_price"), rs.getInt("quantity"), rs.getBigDecimal("line_total")), orderId);
+        Shipment shipment = jdbc.query("SELECT tracking_code, shipped_at, delivered_at FROM shipment WHERE order_id = ?", (rs, row) ->
+                new Shipment(rs.getString("tracking_code"), rs.getTimestamp("shipped_at").toInstant(),
+                        rs.getTimestamp("delivered_at") == null ? null : rs.getTimestamp("delivered_at").toInstant()), orderId)
+                .stream().findFirst().orElse(null);
         List<OrderStatusHistory> history = jdbc.query("""
                 SELECT previous_status, new_status, origin, actor_reference, reason, created_at
                 FROM customer_order_status_history WHERE order_id = ? ORDER BY created_at, id
                 """, (rs, row) -> new OrderStatusHistory(valueOf(rs.getString("previous_status")), OrderStatus.valueOf(rs.getString("new_status")),
                 rs.getString("origin"), rs.getString("actor_reference"), rs.getString("reason"), rs.getTimestamp("created_at").toInstant()), orderId);
         return new CustomerOrder(header.id(), header.status(), header.merchandiseTotal(), header.shippingFee(), header.total(),
-                header.shippingZoneName(), header.shippingEstimatedBusinessDays(), header.createdAt(), address, items, history);
+                header.shippingZoneName(), header.shippingEstimatedBusinessDays(), header.createdAt(), address, shipment, items, history);
     }
 
     void transitionContext(String origin, String actor, String reason) {
@@ -78,6 +82,11 @@ class OrderRepository {
                 """, address.recipientName(), address.postalCode(), address.street(), address.number(), address.complement(),
                 address.neighborhood(), address.city(), address.state(), orderId);
     }
+    void updateStatus(UUID orderId, OrderStatus status) { jdbc.update("UPDATE customer_order SET status = ? WHERE id = ?", status.name(), orderId); }
+    void createShipment(UUID orderId, String trackingCode) {
+        jdbc.update("INSERT INTO shipment (order_id, tracking_code) VALUES (?, ?)", orderId, trackingCode);
+    }
+    void markDelivered(UUID orderId) { jdbc.update("UPDATE shipment SET delivered_at = CURRENT_TIMESTAMP WHERE order_id = ? AND delivered_at IS NULL", orderId); }
     private OrderStatus valueOf(String value) { return value == null ? null : OrderStatus.valueOf(value); }
     private record CustomerOrderHeader(UUID id, OrderStatus status, BigDecimal merchandiseTotal, BigDecimal shippingFee,
                                        BigDecimal total, String shippingZoneName, int shippingEstimatedBusinessDays, Instant createdAt) { }

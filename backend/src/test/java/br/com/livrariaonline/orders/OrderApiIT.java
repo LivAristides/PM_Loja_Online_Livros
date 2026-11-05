@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.com.livrariaonline.identity.AppUser;
 import br.com.livrariaonline.identity.IdentityService;
+import br.com.livrariaonline.LivrariaOnlineApplication;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+@SpringBootTest(classes = LivrariaOnlineApplication.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class OrderApiIT {
@@ -95,6 +96,37 @@ class OrderApiIT {
                         .contentType(MediaType.APPLICATION_JSON).content(sameZone))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("O endereço só pode ser corrigido antes do envio."));
         assertThat(value("SELECT COUNT(*) FROM customer_order_status_history WHERE order_id = ?", Integer.class, order.id())).isEqualTo(2);
+    }
+
+    @Test
+    void supportOperatesLogisticsWithMandatoryTrackingAndCustomerSeesIt() throws Exception {
+        AppUser customer = customer("logistics");
+        OrderData order = order(customer, "PAYMENT_CONFIRMED", "01000000");
+        String separation = "{\"status\":\"IN_SEPARATION\"}";
+        String shipmentWithoutTracking = "{\"status\":\"SHIPPED\"}";
+        String trackingCode = "SIM-BR-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String shipment = "{\"status\":\"SHIPPED\",\"trackingCode\":\"" + trackingCode + "\"}";
+
+        mockMvc.perform(put("/api/v1/admin/orders/{id}/logistics", order.id()).with(user("customer").roles("CUSTOMER")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content(separation)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/v1/admin/orders/{id}/logistics", order.id()).with(user("support@example.test").roles("SUPPORT")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content(separation))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("IN_SEPARATION"));
+        mockMvc.perform(put("/api/v1/admin/orders/{id}/logistics", order.id()).with(user("support@example.test").roles("SUPPORT")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content(shipmentWithoutTracking))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("O código de rastreio é obrigatório para enviar o pedido."));
+        mockMvc.perform(put("/api/v1/admin/orders/{id}/logistics", order.id()).with(user("support@example.test").roles("SUPPORT")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content(shipment))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("SHIPPED"))
+                .andExpect(jsonPath("$.shipment.trackingCode").value(trackingCode));
+        mockMvc.perform(get("/api/v1/orders/{id}", order.id()).with(user(customer.email()).roles("CUSTOMER")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.shipment.trackingCode").value(trackingCode))
+                .andExpect(jsonPath("$.history[2].origin").value("SUPPORT"));
+        mockMvc.perform(put("/api/v1/admin/orders/{id}/logistics", order.id()).with(user("support@example.test").roles("SUPPORT")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"DELIVERED\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("DELIVERED"))
+                .andExpect(jsonPath("$.shipment.deliveredAt").exists());
+        assertThat(value("SELECT COUNT(*) FROM audit_log WHERE target_reference = ? AND action = 'ORDER_LOGISTICS_UPDATED'", Integer.class, order.id().toString())).isEqualTo(3);
     }
 
     private AppUser customer(String suffix) { return identityService.registerCustomer("Cliente Pedido", "order-" + suffix + "-" + UUID.randomUUID() + "@example.test", "senha-segura-123", "v1"); }

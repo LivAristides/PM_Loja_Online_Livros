@@ -55,13 +55,38 @@ class OrderService {
         return repository.findForUpdate(orderId);
     }
 
+    @Transactional
+    CustomerOrder advanceLogistics(String actor, UUID orderId, OrderStatus targetStatus, String suppliedTrackingCode) {
+        CustomerOrder order = repository.findForUpdate(orderId);
+        if (!isValidLogisticsTransition(order.status(), targetStatus)) throw new InvalidOrderTransitionException();
+        String trackingCode = normalizeTrackingCode(suppliedTrackingCode);
+        if (targetStatus == OrderStatus.SHIPPED) {
+            if (trackingCode == null) throw new TrackingCodeRequiredException();
+            repository.createShipment(orderId, trackingCode);
+        }
+        if (targetStatus == OrderStatus.DELIVERED) repository.markDelivered(orderId);
+        repository.transitionContext("SUPPORT", actor, transitionReason(targetStatus));
+        repository.updateStatus(orderId, targetStatus);
+        audit.record(new AuditEvent("SUPPORT", actor, "ORDER_LOGISTICS_UPDATED", "CUSTOMER_ORDER", orderId.toString(), UUID.randomUUID(),
+                "{\"status\":\"" + targetStatus.name() + "\"}"));
+        return repository.findForUpdate(orderId);
+    }
+
     private String requiredReason(String value, String fallback) { return value == null || value.isBlank() ? fallback : value.trim(); }
     private String required(String value) { if (value == null || value.isBlank()) throw new IllegalArgumentException("Valor obrigatório."); return value.trim(); }
     private String blankToNull(String value) { return value == null || value.isBlank() ? null : value.trim(); }
     private String normalizePostalCode(String value) { String normalized = value == null ? "" : value.replaceAll("\\D", ""); if (!normalized.matches("[0-9]{8}")) throw new IllegalArgumentException("CEP inválido."); return normalized; }
     private String normalizeState(String value) { String normalized = required(value).toUpperCase(Locale.ROOT); if (!normalized.matches("[A-Z]{2}")) throw new IllegalArgumentException("UF inválida."); return normalized; }
+    private String normalizeTrackingCode(String value) { if (value == null || value.isBlank()) return null; String normalized = value.trim().toUpperCase(Locale.ROOT); if (!normalized.matches("[A-Z0-9-]{6,80}")) throw new IllegalArgumentException("Código de rastreio inválido."); return normalized; }
+    private boolean isValidLogisticsTransition(OrderStatus current, OrderStatus target) {
+        return (current == OrderStatus.PAYMENT_CONFIRMED && target == OrderStatus.IN_SEPARATION)
+                || (current == OrderStatus.IN_SEPARATION && target == OrderStatus.SHIPPED)
+                || (current == OrderStatus.SHIPPED && target == OrderStatus.DELIVERED);
+    }
+    private String transitionReason(OrderStatus target) { return switch (target) { case IN_SEPARATION -> "ORDER_SEPARATION_STARTED"; case SHIPPED -> "ORDER_SHIPPED"; case DELIVERED -> "ORDER_DELIVERED"; default -> throw new InvalidOrderTransitionException(); }; }
 
     static final class InvalidOrderTransitionException extends IllegalArgumentException { InvalidOrderTransitionException() { super("Transição de pedido inválida."); } }
     static final class ShippingAddressCorrectionUnavailableException extends IllegalArgumentException { ShippingAddressCorrectionUnavailableException() { super("O endereço só pode ser corrigido antes do envio."); } }
     static final class ShippingZoneChangeException extends IllegalArgumentException { ShippingZoneChangeException() { super("A correção deve permanecer na mesma zona de frete."); } }
+    static final class TrackingCodeRequiredException extends IllegalArgumentException { TrackingCodeRequiredException() { super("O código de rastreio é obrigatório para enviar o pedido."); } }
 }

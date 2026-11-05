@@ -36,8 +36,13 @@ class OrderController {
     OrderResponse correctAddress(Authentication authentication, @PathVariable UUID id, @Valid @RequestBody ShippingAddressInput input) {
         return OrderResponse.from(service.correctShippingAddress(authentication.getName(), id, input.toModel()));
     }
+    @PutMapping("/admin/orders/{id}/logistics")
+    OrderResponse advanceLogistics(Authentication authentication, @PathVariable UUID id, @Valid @RequestBody LogisticsInput input) {
+        return OrderResponse.from(service.advanceLogistics(authentication.getName(), id, input.status(), input.trackingCode()));
+    }
 
     record CancelOrderInput(@Size(max = 300) String reason) { }
+    record LogisticsInput(@jakarta.validation.constraints.NotNull OrderStatus status, @Size(max = 80) String trackingCode) { }
     record ShippingAddressInput(@NotBlank @Size(max = 120) String recipientName, @NotBlank @Pattern(regexp = "[0-9]{5}-?[0-9]{3}") String postalCode,
                                 @NotBlank @Size(max = 160) String street, @NotBlank @Size(max = 30) String number,
                                 @Size(max = 120) String complement, @NotBlank @Size(max = 120) String neighborhood,
@@ -56,10 +61,13 @@ class OrderController {
     record HistoryResponse(String previousStatus, String newStatus, String origin, String actorReference, String reason, Instant createdAt) {
         static HistoryResponse from(OrderStatusHistory history) { return new HistoryResponse(history.previousStatus() == null ? null : history.previousStatus().name(), history.newStatus().name(), history.origin(), history.actorReference(), history.reason(), history.createdAt()); }
     }
+    record ShipmentResponse(String trackingCode, Instant shippedAt, Instant deliveredAt) {
+        static ShipmentResponse from(Shipment shipment) { return shipment == null ? null : new ShipmentResponse(shipment.trackingCode(), shipment.shippedAt(), shipment.deliveredAt()); }
+    }
     record OrderResponse(UUID id, String status, BigDecimal merchandiseTotal, BigDecimal shippingFee, BigDecimal total, String shippingZoneName,
-                         int shippingEstimatedBusinessDays, Instant createdAt, AddressResponse shippingAddress, List<ItemResponse> items, List<HistoryResponse> history) {
+                         int shippingEstimatedBusinessDays, Instant createdAt, AddressResponse shippingAddress, ShipmentResponse shipment, List<ItemResponse> items, List<HistoryResponse> history) {
         static OrderResponse from(CustomerOrder order) { return new OrderResponse(order.id(), order.status().name(), order.merchandiseTotal(), order.shippingFee(), order.total(),
                 order.shippingZoneName(), order.shippingEstimatedBusinessDays(), order.createdAt(), AddressResponse.from(order.shippingAddress()),
-                order.items().stream().map(ItemResponse::from).toList(), order.history().stream().map(HistoryResponse::from).toList()); }
+                ShipmentResponse.from(order.shipment()), order.items().stream().map(ItemResponse::from).toList(), order.history().stream().map(HistoryResponse::from).toList()); }
     }
 }

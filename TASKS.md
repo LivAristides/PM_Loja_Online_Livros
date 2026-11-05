@@ -25,7 +25,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 15 | TASK-015 | Compra | P0 | 014 | DONE |
 | 16 | TASK-016 | Compra | P0 | 015 | DONE |
 | 17 | TASK-017 | Compra | P0 | 016 | DONE |
-| 18 | TASK-018 | Compra | P0 | 017 | BLOCKED |
+| 18 | TASK-018 | Compra | P0 | 017 | DONE |
 | 19 | TASK-019 | Compra | P0 | 018 | BLOCKED |
 | 20 | TASK-020 | Checkpoint | P0 | 019 | BLOCKED |
 | 21 | TASK-021 | Operação | P0 | 020 | BLOCKED |
