@@ -67,6 +67,7 @@ class PaymentApiIT {
                 .andExpect(status().isNoContent());
         assertThat(jdbcTemplate.queryForObject("SELECT status FROM payment_attempt WHERE id = ?", String.class, attemptId)).isEqualTo("APPROVED");
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM payment_webhook_event WHERE event_id = ?", Integer.class, eventId)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM outbox_message WHERE message_type = 'ORDER_NOTIFICATION' AND payload->>'eventType' = 'PAYMENT_CONFIRMED' AND payload->>'orderId' = ?", Integer.class, orderId.toString())).isEqualTo(1);
     }
 
     @Test

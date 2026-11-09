@@ -23,12 +23,12 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 13 | TASK-013 | Compra | P0 | 012 | DONE |
 | 14 | TASK-014 | Compra | P0 | 013 | DONE |
 | 15 | TASK-015 | Compra | P0 | 014 | DONE |
-| 16 | TASK-016 | Compra | P0 | 015 | BLOCKED |
-| 17 | TASK-017 | Compra | P0 | 016 | BLOCKED |
-| 18 | TASK-018 | Compra | P0 | 017 | BLOCKED |
-| 19 | TASK-019 | Compra | P0 | 018 | BLOCKED |
-| 20 | TASK-020 | Checkpoint | P0 | 019 | BLOCKED |
-| 21 | TASK-021 | Operação | P0 | 020 | BLOCKED |
+| 16 | TASK-016 | Compra | P0 | 015 | DONE |
+| 17 | TASK-017 | Compra | P0 | 016 | DONE |
+| 18 | TASK-018 | Compra | P0 | 017 | DONE |
+| 19 | TASK-019 | Compra | P0 | 018 | DONE |
+| 20 | TASK-020 | Checkpoint | P0 | 019 | DONE |
+| 21 | TASK-021 | Operação | P0 | 020 | DONE |
 | 22 | TASK-022 | Operação | P0 | 021 | BLOCKED |
 | 23 | TASK-023 | Operação | P1 | 022 | BLOCKED |
 | 24 | TASK-024 | Operação | P0 | 023 | BLOCKED |
@@ -131,9 +131,13 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 **Objetivo:** Expirar reservas, liberar estoque e processar pagamento tardio/estorno idempotente. **Depende:** 015. **Rastreia:** RF-009/018, RN-004/007. **Aceite:** expiração reiniciável libera uma vez; tardio não reativa pedido. **Testes:** jobs/reinício. **Allowed:** payments/orders/inventory/outbox. **Forbidden:** alterar prazos sem configuração. **DoD:** gates passam.
 
+**Status note:** DONE em 03/11/2026: expiração persistente de reservas, devolução idempotente de estoque e compensação de pagamento tardio validadas por integração, incluindo reinício lógico do consumidor de outbox.
+
 ## TASK-017 - Pedidos do cliente e cancelamento
 
 **Objetivo:** Histórico, transições, cancelamento e correção restrita de endereço. **Depende:** 016. **Rastreia:** RF-010, RN-005/008..010. **Aceite:** transição inválida é rejeitada e histórico registra origem/motivo. **Testes:** máquina de estados/API/UI. **Allowed:** orders/customers frontend. **Forbidden:** retorno/devolução. **DoD:** gates passam.
+
+**Status note:** DONE em 04/11/2026: histórico persistente de estados, confirmação por pagamento aprovado, cancelamento idempotente do cliente e correção de endereço por atendimento na mesma zona foram validados por integração.
 
 ## TASK-018 - Logística e rastreio simulado
 
@@ -143,13 +147,19 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 **Objetivo:** E-mails de teste assíncronos para eventos definidos. **Depende:** 018. **Rastreia:** RF-012, ADR-003/004. **Aceite:** falha não desfaz pedido e é reenviada. **Testes:** outbox/adaptador. **Allowed:** notifications/templates/outbox. **Forbidden:** e-mail real/campanhas. **DoD:** gates passam.
 
+**Status note:** DONE em 05/11/2026: notificações assíncronas de pagamento confirmado, cancelamento, envio e entrega usam outbox persistente e adaptador de e-mail de teste; entrega, falha isolada e repetição conforme política foram validadas por integração.
+
 ## TASK-020 - Checkpoint PHASE-03
 
 **Objetivo:** Validar compra ponta a ponta. **Depende:** 019. **Aceite:** checkout concorrente, pagamento, expiração, cancelamento, rastreio e e-mail passam. **Testes:** E2E/regressão. **Allowed:** correções mínimas fase 03. **Forbidden:** devolução/admin não relacionados. **DoD:** gates globais P0 passam.
 
+**Status note:** DONE em 05/11/2026: regressão isolada aprovou checkout concorrente, pagamento, expiração, cancelamento, rastreio e notificações; frontend validado por lint e build. Não há runner E2E configurado nesta etapa.
+
 ## TASK-021 - Solicitação e tratamento de devolução
 
 **Objetivo:** Implementar devolução integral, prazos, aprovação/recusa e postagem simulada. **Depende:** 020. **Rastreia:** RF-011, RN-011. **Aceite:** motivos/prazos aplicados e recusa exige justificativa. **Testes:** regras e API. **Allowed:** returns/orders/shipping. **Forbidden:** devolução parcial. **DoD:** gates passam.
+
+**Status note:** DONE em 05/11/2026: devolução integral com motivos, prazos de 7/30 dias, decisão de atendimento com justificativa obrigatória na recusa e postagem simulada foi validada por API e integração.
 
 ## TASK-022 - Recebimento, reembolso e estoque de retorno
 

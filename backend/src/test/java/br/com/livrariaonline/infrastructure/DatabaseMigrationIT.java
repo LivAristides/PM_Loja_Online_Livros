@@ -42,6 +42,11 @@ class DatabaseMigrationIT {
         Integer orderMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '9' AND success = true", Integer.class);
         Integer privacyMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '10' AND success = true", Integer.class);
         Integer paymentMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '11' AND success = true", Integer.class);
+        Integer expirationMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '12' AND success = true", Integer.class);
+        Integer orderHistoryMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '13' AND success = true", Integer.class);
+        Integer shipmentMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '14' AND success = true", Integer.class);
+        Integer notificationMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '15' AND success = true", Integer.class);
+        Integer returnMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '16' AND success = true", Integer.class);
         String demoDataPolicy = jdbcTemplate.queryForObject(
                 "SELECT metadata_value FROM application_metadata WHERE metadata_key = 'demo_data_policy'",
                 String.class);
@@ -54,6 +59,11 @@ class DatabaseMigrationIT {
         String orderTable = jdbcTemplate.queryForObject("SELECT to_regclass('customer_order')", String.class);
         String privacyRetentionTable = jdbcTemplate.queryForObject("SELECT to_regclass('privacy_retention_policy')", String.class);
         String paymentAttemptTable = jdbcTemplate.queryForObject("SELECT to_regclass('payment_attempt')", String.class);
+        String expirationTable = jdbcTemplate.queryForObject("SELECT to_regclass('order_reservation_expiration')", String.class);
+        String orderHistoryTable = jdbcTemplate.queryForObject("SELECT to_regclass('customer_order_status_history')", String.class);
+        String shipmentTable = jdbcTemplate.queryForObject("SELECT to_regclass('shipment')", String.class);
+        String notificationDeliveryTable = jdbcTemplate.queryForObject("SELECT to_regclass('notification_delivery')", String.class);
+        String returnRequestTable = jdbcTemplate.queryForObject("SELECT to_regclass('return_request')", String.class);
 
         assertThat(migrationCount).isEqualTo(1);
         assertThat(crossCuttingMigrationCount).isEqualTo(1);
@@ -66,6 +76,11 @@ class DatabaseMigrationIT {
         assertThat(orderMigrationCount).isEqualTo(1);
         assertThat(privacyMigrationCount).isEqualTo(1);
         assertThat(paymentMigrationCount).isEqualTo(1);
+        assertThat(expirationMigrationCount).isEqualTo(1);
+        assertThat(orderHistoryMigrationCount).isEqualTo(1);
+        assertThat(shipmentMigrationCount).isEqualTo(1);
+        assertThat(notificationMigrationCount).isEqualTo(1);
+        assertThat(returnMigrationCount).isEqualTo(1);
         assertThat(demoDataPolicy).isEqualTo("no-personal-data");
         assertThat(outboxTable).isEqualTo("outbox_message");
         assertThat(auditTable).isEqualTo("audit_log");
@@ -76,5 +91,10 @@ class DatabaseMigrationIT {
         assertThat(orderTable).isEqualTo("customer_order");
         assertThat(privacyRetentionTable).isEqualTo("privacy_retention_policy");
         assertThat(paymentAttemptTable).isEqualTo("payment_attempt");
+        assertThat(expirationTable).isEqualTo("order_reservation_expiration");
+        assertThat(orderHistoryTable).isEqualTo("customer_order_status_history");
+        assertThat(shipmentTable).isEqualTo("shipment");
+        assertThat(notificationDeliveryTable).isEqualTo("notification_delivery");
+        assertThat(returnRequestTable).isEqualTo("return_request");
     }
 }

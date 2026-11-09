@@ -2,10 +2,13 @@ package br.com.livrariaonline.payments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import br.com.livrariaonline.notifications.OrderNotificationOutbox;
+import br.com.livrariaonline.notifications.OrderNotificationType;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.UUID;
+import br.com.livrariaonline.outbox.OutboxRepository;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +21,13 @@ class PaymentService {
     private final SimulatedPaymentGateway gateway;
     private final ObjectMapper objectMapper;
     private final String webhookSecret;
+    private final OutboxRepository outboxRepository;
+    private final OrderNotificationOutbox notificationOutbox;
 
     PaymentService(PaymentRepository repository, SimulatedPaymentGateway gateway, ObjectMapper objectMapper,
+                   OutboxRepository outboxRepository, OrderNotificationOutbox notificationOutbox,
                    @Value("${app.payments.webhook-secret}") String webhookSecret) {
-        this.repository = repository; this.gateway = gateway; this.objectMapper = objectMapper; this.webhookSecret = webhookSecret;
+        this.repository = repository; this.gateway = gateway; this.objectMapper = objectMapper; this.outboxRepository = outboxRepository; this.notificationOutbox = notificationOutbox; this.webhookSecret = webhookSecret;
     }
 
     @Transactional
@@ -41,15 +47,28 @@ class PaymentService {
         WebhookPayload event = parse(payload);
         if (!repository.recordWebhook(event.eventId(), event.attemptId(), sha256(payload))) return false;
         PaymentAttempt attempt = repository.find(event.attemptId());
+        if (attempt.status() == PaymentStatus.EXPIRED && event.status() == PaymentStatus.APPROVED) {
+            if (repository.markLatePaymentForRefund(attempt.id())) {
+                String compensation = payload(new PaymentCompensationHandler.LatePaymentPayload(attempt.id(), attempt.orderId()));
+                outboxRepository.enqueue(PaymentCompensationHandler.REFUND_REQUEST, compensation, java.time.Instant.now());
+                outboxRepository.enqueue(PaymentCompensationHandler.LATE_PAYMENT_ALERT, compensation, java.time.Instant.now());
+            }
+            return true;
+        }
         if (attempt.status() != PaymentStatus.PROCESSING) throw new InvalidWebhookStatusException();
         if (event.status() != PaymentStatus.APPROVED && event.status() != PaymentStatus.DECLINED) throw new InvalidWebhookStatusException();
         repository.updateStatus(attempt.id(), event.status());
+        if (event.status() == PaymentStatus.APPROVED) notificationOutbox.publish(attempt.orderId(), OrderNotificationType.PAYMENT_CONFIRMED);
         return true;
     }
 
     private WebhookPayload parse(String payload) {
         try { return objectMapper.readValue(payload, WebhookPayload.class); }
         catch (JsonProcessingException exception) { throw new InvalidWebhookPayloadException(); }
+    }
+    private String payload(Object value) {
+        try { return objectMapper.writeValueAsString(value); }
+        catch (JsonProcessingException exception) { throw new IllegalStateException("Falha ao registrar compensação de pagamento.", exception); }
     }
     private String hmac(String payload) {
         try {
