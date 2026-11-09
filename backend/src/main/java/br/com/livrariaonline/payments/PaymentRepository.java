@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -94,6 +95,18 @@ class PaymentRepository {
 
     boolean markLatePaymentForRefund(UUID attemptId) {
         return jdbc.update("UPDATE payment_attempt SET status = 'REFUND_PENDING', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'EXPIRED'", attemptId) == 1;
+    }
+
+    Optional<UUID> markApprovedPaymentForRefund(UUID orderId) {
+        return jdbc.query("""
+                UPDATE payment_attempt SET status = 'REFUND_PENDING', updated_at = CURRENT_TIMESTAMP
+                WHERE id = (
+                    SELECT id FROM payment_attempt
+                    WHERE order_id = ? AND status = 'APPROVED'
+                    ORDER BY created_at DESC LIMIT 1 FOR UPDATE
+                )
+                RETURNING id
+                """, (rs, row) -> rs.getObject("id", UUID.class), orderId).stream().findFirst();
     }
 
     @Transactional

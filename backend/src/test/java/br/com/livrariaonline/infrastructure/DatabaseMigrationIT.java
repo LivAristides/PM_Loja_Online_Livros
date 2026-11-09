@@ -47,6 +47,7 @@ class DatabaseMigrationIT {
         Integer shipmentMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '14' AND success = true", Integer.class);
         Integer notificationMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '15' AND success = true", Integer.class);
         Integer returnMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '16' AND success = true", Integer.class);
+        Integer returnReceiptMigrationCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '17' AND success = true", Integer.class);
         String demoDataPolicy = jdbcTemplate.queryForObject(
                 "SELECT metadata_value FROM application_metadata WHERE metadata_key = 'demo_data_policy'",
                 String.class);
@@ -81,6 +82,7 @@ class DatabaseMigrationIT {
         assertThat(shipmentMigrationCount).isEqualTo(1);
         assertThat(notificationMigrationCount).isEqualTo(1);
         assertThat(returnMigrationCount).isEqualTo(1);
+        assertThat(returnReceiptMigrationCount).isEqualTo(1);
         assertThat(demoDataPolicy).isEqualTo("no-personal-data");
         assertThat(outboxTable).isEqualTo("outbox_message");
         assertThat(auditTable).isEqualTo("audit_log");
