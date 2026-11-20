@@ -33,7 +33,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 23 | TASK-023 | Operação | P1 | 022 | DONE |
 | 24 | TASK-024 | Operação | P0 | 023 | DONE |
 | 25 | TASK-025 | Operação | P1 | 024 | DONE |
-| 26 | TASK-026 | Operação | P0 | 025 | BLOCKED |
+| 26 | TASK-026 | Operação | P0 | 025 | DONE |
 | 27 | TASK-027 | Checkpoint | P0 | 026 | BLOCKED |
 | 28 | TASK-028 | Qualidade | P0 | 027 | BLOCKED |
 | 29 | TASK-029 | Qualidade | P0 | 028 | BLOCKED |
@@ -188,6 +188,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-026 - Backups, restauração e retenção
 
 **Objetivo:** Documentar/automatizar backup local, teste de restore e expurgo parametrizado. **Depende:** 025. **Rastreia:** RNF-005/007. **Aceite:** backup diário/retenção 7 dias e restore testado. **Testes:** procedimento de restauração. **Allowed:** ops/Compose/docs/jobs. **Forbidden:** destruir dados sem backup validado. **DoD:** RPO/RTO documentados e teste passa.
+
+**Status note:** DONE em 20/11/2026: serviço Compose cria backups PostgreSQL persistentes diariamente, mantém sete dias configuráveis e só expurga dumps após novo sucesso. Restauração em banco temporário foi executada e documentada com RPO de 24 h e RTO de 4 h.
 
 ## TASK-027 - Checkpoint PHASE-04
 

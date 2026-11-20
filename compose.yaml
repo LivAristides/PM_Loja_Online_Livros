@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-livraria_app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -21,6 +21,23 @@ services:
     image: axllent/mailpit:v1.25
     ports:
       - "${MAILPIT_UI_PORT:-8025}:8025"
+
+  backup:
+    build:
+      context: ./ops/backup
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-livraria}
+      PGUSER: ${POSTGRES_USER:-livraria_app}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+    volumes:
+      - backup-data:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   backend:
     build:
@@ -58,3 +75,4 @@ services:
 volumes:
   postgres-data:
   cover-data:
+  backup-data:
