@@ -32,7 +32,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 22 | TASK-022 | Operação | P0 | 021 | DONE |
 | 23 | TASK-023 | Operação | P1 | 022 | DONE |
 | 24 | TASK-024 | Operação | P0 | 023 | DONE |
-| 25 | TASK-025 | Operação | P1 | 024 | BLOCKED |
+| 25 | TASK-025 | Operação | P1 | 024 | DONE |
 | 26 | TASK-026 | Operação | P0 | 025 | BLOCKED |
 | 27 | TASK-027 | Checkpoint | P0 | 026 | BLOCKED |
 | 28 | TASK-028 | Qualidade | P0 | 027 | BLOCKED |
@@ -182,6 +182,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-025 - Relatórios básicos
 
 **Objetivo:** Vendas, mais vendidos e estoque baixo com acesso apropriado. **Depende:** 024. **Rastreia:** RF-016. **Aceite:** totais usam snapshots e respeitam período/perfil. **Testes:** consultas/API/UI. **Allowed:** reports/administration. **Forbidden:** BI/exportações não especificadas. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: relatórios administrativos de vendas, mais vendidos e estoque baixo usam snapshots de pedidos, aceitam período ou limite aplicável e aplicam RBAC explícito.
 
 ## TASK-026 - Backups, restauração e retenção
 
