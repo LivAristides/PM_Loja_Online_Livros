@@ -29,7 +29,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 19 | TASK-019 | Compra | P0 | 018 | DONE |
 | 20 | TASK-020 | Checkpoint | P0 | 019 | DONE |
 | 21 | TASK-021 | Operação | P0 | 020 | DONE |
-| 22 | TASK-022 | Operação | P0 | 021 | IN_PROGRESS |
+| 22 | TASK-022 | Operação | P0 | 021 | DONE |
 | 23 | TASK-023 | Operação | P1 | 022 | BLOCKED |
 | 24 | TASK-024 | Operação | P0 | 023 | BLOCKED |
 | 25 | TASK-025 | Operação | P1 | 024 | BLOCKED |
@@ -164,6 +164,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-022 - Recebimento, reembolso e estoque de retorno
 
 **Objetivo:** Conferir retorno, estornar e decidir reentrada/baixa por avaria. **Depende:** 021. **Rastreia:** RF-011, RN-012. **Aceite:** estorno integral automático e movimento de estoque auditado. **Testes:** integração pagamento/estoque. **Allowed:** returns/payments/inventory/outbox. **Forbidden:** alterar fluxo de pedido não relacionado. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: recebimento de devolução solicita estorno integral via outbox persistente, registra o pagamento em estorno pendente, audita reentrada ou baixa por avaria e encerra o pedido retornado. Migração, API e regressão de backend foram validadas; frontend passou em lint e build.
 
 ## TASK-023 - Administração operacional e financeiro
 
