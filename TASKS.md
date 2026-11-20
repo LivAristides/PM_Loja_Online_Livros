@@ -35,7 +35,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 25 | TASK-025 | Operação | P1 | 024 | DONE |
 | 26 | TASK-026 | Operação | P0 | 025 | DONE |
 | 27 | TASK-027 | Checkpoint | P0 | 026 | DONE |
-| 28 | TASK-028 | Qualidade | P0 | 027 | BLOCKED |
+| 28 | TASK-028 | Qualidade | P0 | 027 | DONE |
 | 29 | TASK-029 | Qualidade | P0 | 028 | BLOCKED |
 | 30 | TASK-030 | Qualidade | P0 | 029 | BLOCKED |
 
@@ -200,6 +200,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-028 - OpenAPI, hardening e observabilidade básica
 
 **Objetivo:** Publicar contrato, revisar validações, segredos, correlação e logs seguros. **Depende:** 027. **Rastreia:** RNF-006..008. **Aceite:** OpenAPI atual, erros consistentes e logs sem dados sensíveis. **Testes:** API/segurança. **Allowed:** api/config/docs/audit. **Forbidden:** trocar arquitetura/auth. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: OpenAPI e Swagger UI foram publicados; falhas de validação, autenticação e autorização usam envelope seguro com correlationId. O segredo de webhook é obrigatório fora de testes e logs de erro registram somente tipo e correlação. APIs, regressão e frontend foram validados.
 
 ## TASK-029 - Acessibilidade, responsividade e desempenho
 

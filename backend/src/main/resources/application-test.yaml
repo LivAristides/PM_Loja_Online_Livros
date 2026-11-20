@@ -8,5 +8,7 @@ spring:
     password: ${DB_PASSWORD:change-me-local-only}
 
 app:
+  payments:
+    webhook-secret: development-only-payment-webhook-secret
   storage:
     covers-path: ${COVER_STORAGE_PATH:/tmp/livraria-covers}

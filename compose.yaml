@@ -49,6 +49,7 @@ services:
       DB_NAME: ${POSTGRES_DB:-livraria}
       DB_USERNAME: ${POSTGRES_USER:-livraria_app}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
+      PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:?Defina PAYMENT_WEBHOOK_SECRET no arquivo .env local}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
       COVER_STORAGE_PATH: /data/covers
