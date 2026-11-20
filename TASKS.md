@@ -34,7 +34,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 24 | TASK-024 | Operação | P0 | 023 | DONE |
 | 25 | TASK-025 | Operação | P1 | 024 | DONE |
 | 26 | TASK-026 | Operação | P0 | 025 | DONE |
-| 27 | TASK-027 | Checkpoint | P0 | 026 | BLOCKED |
+| 27 | TASK-027 | Checkpoint | P0 | 026 | DONE |
 | 28 | TASK-028 | Qualidade | P0 | 027 | BLOCKED |
 | 29 | TASK-029 | Qualidade | P0 | 028 | BLOCKED |
 | 30 | TASK-030 | Qualidade | P0 | 029 | BLOCKED |
@@ -194,6 +194,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-027 - Checkpoint PHASE-04
 
 **Objetivo:** Validar operação administrativa, devolução e recuperação. **Depende:** 026. **Aceite:** auditoria, RBAC, devolução, backup e relatórios coerentes. **Testes:** regressão fase. **Allowed:** correções mínimas fase 04. **Forbidden:** novos recursos fora do MVP. **DoD:** gates globais P0 passam.
+
+**Status note:** DONE em 20/11/2026: regressão de auditoria, RBAC, devoluções, estornos e relatórios passou. Backup e restauração não destrutiva foram executados com sucesso no esquema Flyway versão 18; o verificador foi corrigido para reportar a última migração pela ordem de instalação.
 
 ## TASK-028 - OpenAPI, hardening e observabilidade básica
 

@@ -11,6 +11,6 @@ trap cleanup EXIT INT TERM
 
 createdb "$temporary_database"
 pg_restore --exit-on-error --no-owner --no-privileges --dbname="$temporary_database" "$backup"
-schema_version="$(psql --dbname="$temporary_database" --tuples-only --no-align --command "SELECT max(version) FROM flyway_schema_history WHERE success = TRUE")"
+schema_version="$(psql --dbname="$temporary_database" --tuples-only --no-align --command "SELECT version FROM flyway_schema_history WHERE success = TRUE ORDER BY installed_rank DESC LIMIT 1")"
 [ -n "$schema_version" ] || { echo "Restore verification failed: Flyway history was not restored" >&2; exit 1; }
 echo "Restauração verificada: Flyway versão $schema_version em banco temporário"
