@@ -30,7 +30,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 20 | TASK-020 | Checkpoint | P0 | 019 | DONE |
 | 21 | TASK-021 | Operação | P0 | 020 | DONE |
 | 22 | TASK-022 | Operação | P0 | 021 | DONE |
-| 23 | TASK-023 | Operação | P1 | 022 | BLOCKED |
+| 23 | TASK-023 | Operação | P1 | 022 | DONE |
 | 24 | TASK-024 | Operação | P0 | 023 | BLOCKED |
 | 25 | TASK-025 | Operação | P1 | 024 | BLOCKED |
 | 26 | TASK-026 | Operação | P0 | 025 | BLOCKED |
@@ -170,6 +170,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-023 - Administração operacional e financeiro
 
 **Objetivo:** Painéis para pedidos, pendências de estorno e intervenção manual justificada. **Depende:** 022. **Rastreia:** RF-013/015. **Aceite:** financeiro/admin resolvem somente ações permitidas e há auditoria. **Testes:** RBAC/API/UI. **Allowed:** administration/payments/orders/audit frontend. **Forbidden:** permissões implícitas. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: painéis administrativos separados por papel exibem pedidos operacionais para Atendimento/Admin e pendências de estorno para Financeiro/Admin. Reprocessamento manual de estorno com falha exige justificativa, publica solicitação persistente e gera auditoria. RBAC, API, regressão e build do frontend foram validados.
 
 ## TASK-024 - Administração de usuários e configurações
 

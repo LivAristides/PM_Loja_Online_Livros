@@ -109,16 +109,36 @@ class PaymentRepository {
                 """, (rs, row) -> rs.getObject("id", UUID.class), orderId).stream().findFirst();
     }
 
+    List<RefundPending> refundsForOperations() {
+        return jdbc.query("""
+                SELECT p.id, p.order_id, p.payment_method, p.status, p.provider_transaction_id, p.created_at, o.total
+                FROM payment_attempt p JOIN customer_order o ON o.id = p.order_id
+                WHERE p.status IN ('REFUND_PENDING', 'REFUND_FAILED')
+                ORDER BY p.created_at DESC
+                """, (rs, row) -> new RefundPending(rs.getObject("id", UUID.class), rs.getObject("order_id", UUID.class),
+                PaymentMethod.valueOf(rs.getString("payment_method")), PaymentStatus.valueOf(rs.getString("status")),
+                rs.getString("provider_transaction_id"), rs.getTimestamp("created_at").toInstant(), rs.getBigDecimal("total")));
+    }
+
+    PaymentAttempt retryFailedRefund(UUID attemptId) {
+        int affected = jdbc.update("UPDATE payment_attempt SET status = 'REFUND_PENDING', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'REFUND_FAILED'", attemptId);
+        if (affected != 1) throw new RefundRetryUnavailableException();
+        return find(attemptId);
+    }
+
     @Transactional
     void completeRefund(UUID attemptId) {
         jdbc.update("UPDATE payment_attempt SET status = 'REFUNDED', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'REFUND_PENDING'", attemptId);
     }
 
     record ReservationCandidate(UUID orderId, Instant createdAt, PaymentMethod paymentMethod) { }
+    record RefundPending(UUID attemptId, UUID orderId, PaymentMethod method, PaymentStatus status, String transactionReference, Instant createdAt,
+                         java.math.BigDecimal orderTotal) { }
     private record ReservedItem(UUID bookId, int quantity) { }
 
     static final class PaymentAccessDeniedException extends IllegalArgumentException { PaymentAccessDeniedException() { super("Pedido indisponível para pagamento."); } }
     static final class CardAttemptLimitException extends IllegalArgumentException { CardAttemptLimitException() { super("O cartão permite no máximo três tentativas."); } }
     static final class ProcessingPaymentException extends IllegalArgumentException { ProcessingPaymentException() { super("Já existe uma tentativa de pagamento em processamento."); } }
     static final class PaymentAttemptNotFoundException extends IllegalArgumentException { PaymentAttemptNotFoundException() { super("Tentativa de pagamento não encontrada."); } }
+    static final class RefundRetryUnavailableException extends IllegalArgumentException { RefundRetryUnavailableException() { super("Somente um estorno com falha pode ser reprocessado."); } }
 }

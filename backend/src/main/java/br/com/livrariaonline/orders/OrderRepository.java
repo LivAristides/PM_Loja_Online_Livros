@@ -22,6 +22,15 @@ class OrderRepository {
                 rs.getBigDecimal("total"), rs.getTimestamp("created_at").toInstant(), rs.getInt("item_count")), email);
     }
 
+    List<CustomerOrderSummary> operationalSummaries() {
+        return jdbc.query("""
+                SELECT o.id, o.status, o.total, o.created_at, COUNT(item.id) AS item_count
+                FROM customer_order o JOIN customer_order_item item ON item.order_id = o.id
+                GROUP BY o.id ORDER BY o.created_at DESC
+                """, (rs, row) -> new CustomerOrderSummary(rs.getObject("id", UUID.class), OrderStatus.valueOf(rs.getString("status")),
+                rs.getBigDecimal("total"), rs.getTimestamp("created_at").toInstant(), rs.getInt("item_count")));
+    }
+
     CustomerOrder findOwned(String email, UUID orderId) { return find(orderId, "u.email = ?", email); }
     CustomerOrder findForUpdate(UUID orderId) { return find(orderId, "TRUE FOR UPDATE", new Object[0]); }
     CustomerOrder findOwnedForUpdate(String email, UUID orderId) { return find(orderId, "u.email = ? FOR UPDATE", email); }
