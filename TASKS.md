@@ -31,7 +31,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 21 | TASK-021 | Operação | P0 | 020 | DONE |
 | 22 | TASK-022 | Operação | P0 | 021 | DONE |
 | 23 | TASK-023 | Operação | P1 | 022 | DONE |
-| 24 | TASK-024 | Operação | P0 | 023 | BLOCKED |
+| 24 | TASK-024 | Operação | P0 | 023 | DONE |
 | 25 | TASK-025 | Operação | P1 | 024 | BLOCKED |
 | 26 | TASK-026 | Operação | P0 | 025 | BLOCKED |
 | 27 | TASK-027 | Checkpoint | P0 | 026 | BLOCKED |
@@ -176,6 +176,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-024 - Administração de usuários e configurações
 
 **Objetivo:** Criar/desativar administradores e manter dados da loja/faixas de frete. **Depende:** 023. **Rastreia:** RF-013/017, RN-015. **Aceite:** convite/troca inicial e menor privilégio funcionam. **Testes:** RBAC/configuração. **Allowed:** administration/identity/settings. **Forbidden:** cadastro público de admin. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: convite administrativo exclusivo do Administrador Geral, troca inicial obrigatória no servidor, listagem e desativação sem exclusão física foram implementados. Dados institucionais e zonas de frete permanecem restritos ao Administrador Geral e agora são auditados. APIs, RBAC, migração, regressão e frontend foram validados.
 
 ## TASK-025 - Relatórios básicos
 

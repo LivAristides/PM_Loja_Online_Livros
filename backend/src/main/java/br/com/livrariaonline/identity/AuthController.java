@@ -57,7 +57,7 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             identityService.recordSuccessfulLogin(request.email());
             return ResponseEntity.ok(new SessionResponse(authentication.getName(), authentication.getAuthorities().stream()
-                    .map(authority -> authority.getAuthority()).toList()));
+                    .map(authority -> authority.getAuthority()).toList(), identityService.requiresInitialPasswordChange(authentication.getName())));
         } catch (IdentityService.AccountLockedException | LockedException exception) {
             return ResponseEntity.status(HttpStatus.LOCKED).body(Map.of("code", "account_locked",
                     "message", "Conta temporariamente bloqueada. Tente novamente em 15 minutos."));
@@ -100,7 +100,7 @@ public class AuthController {
     @GetMapping("/session")
     public SessionResponse session(Authentication authentication) {
         return new SessionResponse(authentication.getName(), authentication.getAuthorities().stream()
-                .map(authority -> authority.getAuthority()).toList());
+                .map(authority -> authority.getAuthority()).toList(), identityService.requiresInitialPasswordChange(authentication.getName()));
     }
 
     public record RegistrationRequest(@NotBlank @Size(max = 120) String name,
@@ -118,5 +118,5 @@ public class AuthController {
             return new AuthResponse(user.id().toString(), user.email(), user.roles().stream().map(Role::name).toList());
         }
     }
-    public record SessionResponse(String email, List<String> roles) { }
+    public record SessionResponse(String email, List<String> roles, boolean passwordChangeRequired) { }
 }
