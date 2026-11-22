@@ -36,7 +36,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 26 | TASK-026 | Operação | P0 | 025 | DONE |
 | 27 | TASK-027 | Checkpoint | P0 | 026 | DONE |
 | 28 | TASK-028 | Qualidade | P0 | 027 | DONE |
-| 29 | TASK-029 | Qualidade | P0 | 028 | BLOCKED |
+| 29 | TASK-029 | Qualidade | P0 | 028 | DONE |
 | 30 | TASK-030 | Qualidade | P0 | 029 | BLOCKED |
 
 ## TASK-001 - Inicializar monorepo e execução local
@@ -206,6 +206,8 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-029 - Acessibilidade, responsividade e desempenho
 
 **Objetivo:** Validar WCAG AA prioritário, navegadores/telas e metas de volume. **Depende:** 028. **Rastreia:** RNF-001..004. **Aceite:** fluxos por teclado, Lighthouse e carga simples atendem metas ou têm decisão registrada. **Testes:** E2E/a11y/k6. **Allowed:** frontend/testes/config de índices. **Forbidden:** alterar regras de negócio. **DoD:** evidências salvas.
+
+**Status note:** DONE em 22/11/2026: foco visível, labels, regiões anunciadas, fechamento de diálogos por Escape e layout de 360 px foram revisados. Lint/build passaram. A auditoria Lighthouse e a validação manual em navegadores foram documentadas como decisão pendente de CI ou máquina com navegador acessível, sem métricas fabricadas; ver `docs/quality/task-029-evidence.md`.
 
 ## TASK-030 - Checkpoint final de release
 

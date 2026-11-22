@@ -29,6 +29,12 @@ function App() {
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [showLogin, setShowLogin] = useState(false); const [orders, setOrders] = useState<OrderSummary[]>([]); const [showOrders, setShowOrders] = useState(false); const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null)
   useEffect(() => { const controller = new AbortController(); setLoading(true); fetch(`${API_URL}/api/v1/books?${catalogQuery(applied, page)}`, { signal: controller.signal }).then(async response => { if (!response.ok) throw new Error('Não foi possível carregar o catálogo.'); return response.json() }).then(setCatalog).catch(reason => { if (reason.name !== 'AbortError') setNotice(reason.message) }).finally(() => setLoading(false)); return () => controller.abort() }, [applied, page])
   useEffect(() => { fetch(`${API_URL}/api/v1/auth/session`, { credentials: 'include' }).then(response => response.ok ? response.json() : null).then(current => { setSession(current); if (current?.roles?.includes('ROLE_CUSTOMER')) loadCart() }) }, [])
+  useEffect(() => {
+    if (!detail && !selectedOrder) return
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') { setDetail(null); setSelectedOrder(null) } }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [detail, selectedOrder])
   async function loadCart() { const response = await fetch(`${API_URL}/api/v1/cart`, { credentials: 'include' }); if (response.ok) setCart(await response.json()) }
   async function loadOrders() { const response = await fetch(`${API_URL}/api/v1/orders`, { credentials: 'include' }); if (response.ok) setOrders(await response.json()) }
   async function openOrder(id: string) { const response = await fetch(`${API_URL}/api/v1/orders/${id}`, { credentials: 'include' }); if (response.ok) { const order: OrderDetail = await response.json(); if (order.shipment) order.history = [...order.history, { previousStatus: null, newStatus: `RASTREIO ${order.shipment.trackingCode}`, origin: 'SHIPMENT', actorReference: null, reason: order.shipment.deliveredAt ? 'Entrega confirmada' : 'Em trânsito', createdAt: order.shipment.shippedAt }]; setSelectedOrder(order) } else setNotice('Não foi possível carregar o pedido.') }
