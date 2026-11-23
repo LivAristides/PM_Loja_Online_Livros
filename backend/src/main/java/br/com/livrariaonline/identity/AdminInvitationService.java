@@ -37,7 +37,7 @@ public class AdminInvitationService {
                 AND expires_at > CURRENT_TIMESTAMP FOR UPDATE
                 """, rs -> rs.next() ? new Invitation(rs.getString(1), Role.valueOf(rs.getString(2))) : null, hash(token));
         if (invitation == null) throw new InvalidInvitationException();
-        identityRepository.createUser(name, invitation.email(), passwordEncoder.encode(password), invitation.role());
+        identityRepository.createUser(name, invitation.email(), passwordEncoder.encode(password), invitation.role(), true);
         jdbcTemplate.update("UPDATE admin_invitation SET accepted_at = CURRENT_TIMESTAMP WHERE token_hash = ?", hash(token));
     }
     private String token() { byte[] bytes = new byte[32]; RANDOM.nextBytes(bytes); return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); }

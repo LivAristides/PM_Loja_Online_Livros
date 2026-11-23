@@ -8,6 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.UUID;
+import java.util.List;
+import java.util.Map;
+import br.com.livrariaonline.audit.AuditEvent;
+import br.com.livrariaonline.audit.AuditLogService;
 import br.com.livrariaonline.outbox.OutboxRepository;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -23,11 +27,12 @@ class PaymentService {
     private final String webhookSecret;
     private final OutboxRepository outboxRepository;
     private final OrderNotificationOutbox notificationOutbox;
+    private final AuditLogService audit;
 
     PaymentService(PaymentRepository repository, SimulatedPaymentGateway gateway, ObjectMapper objectMapper,
-                   OutboxRepository outboxRepository, OrderNotificationOutbox notificationOutbox,
+                   OutboxRepository outboxRepository, OrderNotificationOutbox notificationOutbox, AuditLogService audit,
                    @Value("${app.payments.webhook-secret}") String webhookSecret) {
-        this.repository = repository; this.gateway = gateway; this.objectMapper = objectMapper; this.outboxRepository = outboxRepository; this.notificationOutbox = notificationOutbox; this.webhookSecret = webhookSecret;
+        this.repository = repository; this.gateway = gateway; this.objectMapper = objectMapper; this.outboxRepository = outboxRepository; this.notificationOutbox = notificationOutbox; this.audit = audit; this.webhookSecret = webhookSecret;
     }
 
     @Transactional
@@ -62,6 +67,19 @@ class PaymentService {
         return true;
     }
 
+    List<PaymentRepository.RefundPending> pendingRefunds() { return repository.refundsForOperations(); }
+
+    @Transactional
+    PaymentAttempt retryRefund(String actor, UUID attemptId, String justification) {
+        if (justification == null || justification.isBlank()) throw new RefundJustificationRequiredException();
+        PaymentAttempt attempt = repository.retryFailedRefund(attemptId);
+        String compensation = payload(new PaymentCompensationHandler.LatePaymentPayload(attempt.id(), attempt.orderId()));
+        outboxRepository.enqueue(PaymentCompensationHandler.REFUND_REQUEST, compensation, java.time.Instant.now());
+        audit.record(new AuditEvent("FINANCE", actor, "PAYMENT_REFUND_RETRY_REQUESTED", "PAYMENT_ATTEMPT", attemptId.toString(), UUID.randomUUID(),
+                payload(Map.of("justification", justification.trim()))));
+        return attempt;
+    }
+
     private WebhookPayload parse(String payload) {
         try { return objectMapper.readValue(payload, WebhookPayload.class); }
         catch (JsonProcessingException exception) { throw new InvalidWebhookPayloadException(); }
@@ -86,4 +104,5 @@ class PaymentService {
     static final class InvalidWebhookSignatureException extends IllegalArgumentException { InvalidWebhookSignatureException() { super("Assinatura de webhook inválida."); } }
     static final class InvalidWebhookPayloadException extends IllegalArgumentException { InvalidWebhookPayloadException() { super("Evento de webhook inválido."); } }
     static final class InvalidWebhookStatusException extends IllegalArgumentException { InvalidWebhookStatusException() { super("Transição de pagamento inválida."); } }
+    static final class RefundJustificationRequiredException extends IllegalArgumentException { RefundJustificationRequiredException() { super("A intervenção manual exige justificativa."); } }
 }

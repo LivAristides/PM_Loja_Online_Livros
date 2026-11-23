@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
 
 @RestController
 class ShippingController {
@@ -30,13 +31,13 @@ class ShippingController {
     @GetMapping("/api/v1/admin/settings")
     StoreResponse settings() { return StoreResponse.from(service.settings()); }
     @PutMapping("/api/v1/admin/settings")
-    ResponseEntity<Void> updateSettings(@Valid @RequestBody StoreInput input) { service.updateSettings(input.storeName(), input.contactEmail(), input.contactPhone()); return ResponseEntity.noContent().build(); }
+    ResponseEntity<Void> updateSettings(@Valid @RequestBody StoreInput input, Authentication authentication) { service.updateSettings(authentication.getName(), input.storeName(), input.contactEmail(), input.contactPhone()); return ResponseEntity.noContent().build(); }
     @GetMapping("/api/v1/admin/shipping-zones")
     List<ZoneResponse> zones() { return service.zones().stream().map(ZoneResponse::from).toList(); }
     @PostMapping("/api/v1/admin/shipping-zones")
-    ResponseEntity<ZoneResponse> createZone(@Valid @RequestBody ZoneInput input) { return ResponseEntity.status(HttpStatus.CREATED).body(ZoneResponse.from(service.createZone(input.name(), input.postalCodeStart(), input.postalCodeEnd(), input.fee(), input.estimatedBusinessDays()))); }
+    ResponseEntity<ZoneResponse> createZone(@Valid @RequestBody ZoneInput input, Authentication authentication) { return ResponseEntity.status(HttpStatus.CREATED).body(ZoneResponse.from(service.createZone(authentication.getName(), input.name(), input.postalCodeStart(), input.postalCodeEnd(), input.fee(), input.estimatedBusinessDays()))); }
     @DeleteMapping("/api/v1/admin/shipping-zones/{id}")
-    ResponseEntity<Void> deactivateZone(@PathVariable UUID id) { service.deactivateZone(id); return ResponseEntity.noContent().build(); }
+    ResponseEntity<Void> deactivateZone(@PathVariable UUID id, Authentication authentication) { service.deactivateZone(authentication.getName(), id); return ResponseEntity.noContent().build(); }
     record StoreInput(@NotBlank String storeName, @NotBlank @Email String contactEmail, String contactPhone) { }
     record ZoneInput(@NotBlank String name, @NotBlank String postalCodeStart, @NotBlank String postalCodeEnd,
                      @DecimalMin(value="0.00") BigDecimal fee, @Min(1) @Max(60) int estimatedBusinessDays) { }

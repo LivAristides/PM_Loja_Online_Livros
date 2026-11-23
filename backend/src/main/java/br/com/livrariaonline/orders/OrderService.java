@@ -24,6 +24,7 @@ class OrderService {
     }
 
     List<CustomerOrderSummary> list(String customerEmail) { return repository.summaries(customerEmail); }
+    List<CustomerOrderSummary> operationalList() { return repository.operationalSummaries(); }
     CustomerOrder detail(String customerEmail, UUID orderId) { return repository.findOwned(customerEmail, orderId); }
 
     @Transactional

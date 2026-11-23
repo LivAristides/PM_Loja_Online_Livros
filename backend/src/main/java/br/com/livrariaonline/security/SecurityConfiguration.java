@@ -1,6 +1,8 @@
 package br.com.livrariaonline.security;
 
 import br.com.livrariaonline.identity.IdentityService;
+import br.com.livrariaonline.identity.InitialPasswordChangeFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,10 +16,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
+import br.com.livrariaonline.shared.error.ApiErrorWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -46,7 +52,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, InitialPasswordChangeFilter initialPasswordChangeFilter, ApiErrorWriter apiErrors) throws Exception {
         CookieCsrfTokenRepository csrf = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrf.setCookieCustomizer(cookie -> cookie.sameSite("Lax").path("/"));
         http
@@ -55,6 +61,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
                                 "/api/v1/auth/password-recovery", "/api/v1/auth/password-reset", "/api/v1/auth/admin-invitations/accept").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/webhooks/payments").permitAll()
                         .requestMatchers("/api/v1/books/**").permitAll()
                         .requestMatchers("/api/v1/checkout/**").hasRole("CUSTOMER")
@@ -62,13 +69,19 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/returns/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/admin/orders/**").hasAnyRole("GENERAL_ADMINISTRATOR", "SUPPORT")
                         .requestMatchers("/api/v1/admin/returns/**").hasAnyRole("GENERAL_ADMINISTRATOR", "SUPPORT")
+                        .requestMatchers("/api/v1/admin/finance/**").hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
+                        .requestMatchers("/api/v1/admin/reports/sales", "/api/v1/admin/reports/best-sellers")
+                        .hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
+                        .requestMatchers("/api/v1/admin/reports/low-stock").hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
                         .requestMatchers("/api/v1/auth/admin-invitations").hasRole("GENERAL_ADMINISTRATOR")
+                        .requestMatchers("/api/v1/admin/users/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/identity/access/admin/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/identity/access/catalog/**").hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
                         .requestMatchers("/api/v1/admin/catalog/**", "/api/v1/admin/inventory/**")
                         .hasAnyRole("GENERAL_ADMINISTRATOR", "CATALOG_MANAGER")
                         .requestMatchers("/api/v1/admin/settings/**", "/api/v1/admin/shipping-zones/**").hasRole("GENERAL_ADMINISTRATOR")
                         .requestMatchers("/api/v1/admin/privacy/**").hasRole("GENERAL_ADMINISTRATOR")
+                        .requestMatchers("/api/v1/auth/admin-password-change").authenticated()
                         .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/payments/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/identity/access/finance/**").hasAnyRole("GENERAL_ADMINISTRATOR", "FINANCE")
@@ -78,9 +91,18 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionFixation(fixation -> fixation.changeSessionId()))
                 .securityContext(context -> context.requireExplicitSave(false))
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint(apiErrors)).accessDeniedHandler(accessDeniedHandler(apiErrors)))
+                .addFilterAfter(initialPasswordChangeFilter, AuthorizationFilter.class)
                 .logout(logout -> logout.logoutUrl("/api/v1/auth/logout").deleteCookies("LIVRARIA_SESSION", "XSRF-TOKEN")
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(204)));
         return http.build();
+    }
+
+    private AuthenticationEntryPoint authenticationEntryPoint(ApiErrorWriter errors) {
+        return (request, response, exception) -> errors.write(response, HttpServletResponse.SC_UNAUTHORIZED, "authentication_required", "Autenticação necessária.");
+    }
+    private AccessDeniedHandler accessDeniedHandler(ApiErrorWriter errors) {
+        return (request, response, exception) -> errors.write(response, HttpServletResponse.SC_FORBIDDEN, "access_denied", "Acesso não autorizado.");
     }
 
     @Bean

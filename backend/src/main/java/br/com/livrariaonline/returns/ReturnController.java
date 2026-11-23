@@ -33,14 +33,21 @@ class ReturnController {
     ReturnResponse decide(Authentication authentication, @PathVariable UUID id, @Valid @RequestBody DecisionInput input) {
         return ReturnResponse.from(service.decide(authentication.getName(), id, input.status(), input.justification()));
     }
+    @PutMapping("/api/v1/admin/returns/{id}/receipt")
+    ReturnResponse receive(Authentication authentication, @PathVariable UUID id, @Valid @RequestBody ReceiptInput input) {
+        return ReturnResponse.from(service.receive(authentication.getName(), id, input.disposition()));
+    }
 
     record RequestInput(@NotNull ReturnReason reason) { }
     record PostingInput(@NotBlank @Size(max = 80) String trackingCode) { }
     record DecisionInput(@NotNull ReturnStatus status, @Size(max = 300) String justification) { }
+    record ReceiptInput(@NotNull ReturnReceiptDisposition disposition) { }
     record ReturnResponse(UUID id, UUID orderId, String reason, String status, Instant requestedAt, Instant reviewDueAt, Instant approvedAt,
-                          String refusalJustification, Instant postingDueAt, Instant postedAt, String returnTrackingCode) {
+                          String refusalJustification, Instant postingDueAt, Instant postedAt, String returnTrackingCode,
+                          Instant receivedAt, String receiptDisposition, UUID refundPaymentAttemptId) {
         static ReturnResponse from(ReturnRequest request) { return new ReturnResponse(request.id(), request.orderId(), request.reason().name(), request.status().name(),
                 request.requestedAt(), request.reviewDueAt(), request.approvedAt(), request.refusalJustification(), request.postingDueAt(),
-                request.postedAt(), request.returnTrackingCode()); }
+                request.postedAt(), request.returnTrackingCode(), request.receivedAt(),
+                request.receiptDisposition() == null ? null : request.receiptDisposition().name(), request.refundPaymentAttemptId()); }
     }
 }

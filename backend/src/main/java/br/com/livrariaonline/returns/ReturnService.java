@@ -2,6 +2,7 @@ package br.com.livrariaonline.returns;
 
 import br.com.livrariaonline.audit.AuditEvent;
 import br.com.livrariaonline.audit.AuditLogService;
+import br.com.livrariaonline.payments.ReturnRefundService;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -15,8 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 class ReturnService {
     private final ReturnRepository repository;
     private final AuditLogService audit;
+    private final ReturnRefundService refundService;
 
-    ReturnService(ReturnRepository repository, AuditLogService audit) { this.repository = repository; this.audit = audit; }
+    ReturnService(ReturnRepository repository, AuditLogService audit, ReturnRefundService refundService) {
+        this.repository = repository; this.audit = audit; this.refundService = refundService;
+    }
 
     @Transactional
     ReturnRequest request(String customerEmail, UUID orderId, ReturnReason reason) {
@@ -62,6 +66,20 @@ class ReturnService {
         repository.post(returnId, trackingCode);
         audit.record(new AuditEvent("CUSTOMER", customerEmail, "RETURN_POSTED", "RETURN_REQUEST", returnId.toString(), UUID.randomUUID(), "{\"simulated\":true}"));
         return repository.findOwned(customerEmail, returnId);
+    }
+
+    @Transactional
+    ReturnRequest receive(String actor, UUID returnId, ReturnReceiptDisposition disposition) {
+        ReturnRequest request = repository.findForUpdate(returnId);
+        if (request.status() != ReturnStatus.POSTED) throw new InvalidReturnTransitionException();
+        UUID refundAttemptId = refundService.requestFullRefund(request.orderId());
+        repository.recordInventoryReceipt(request.orderId(), disposition, actor);
+        repository.transitionContext("SUPPORT", actor, "RETURN_RECEIVED_" + disposition.name());
+        repository.markOrderReturned(request.orderId());
+        repository.receive(returnId, disposition, refundAttemptId);
+        audit.record(new AuditEvent("SUPPORT", actor, "RETURN_RECEIVED", "RETURN_REQUEST", returnId.toString(), UUID.randomUUID(),
+                "{\"disposition\":\"" + disposition.name() + "\",\"refundRequested\":true}"));
+        return repository.findForUpdate(returnId);
     }
 
     ReturnRequest detail(String customerEmail, UUID returnId) { return repository.findOwned(customerEmail, returnId); }

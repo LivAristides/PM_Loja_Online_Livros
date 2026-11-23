@@ -26,6 +26,8 @@ class OrderController {
 
     @GetMapping("/orders")
     List<OrderSummaryResponse> list(Authentication authentication) { return service.list(authentication.getName()).stream().map(OrderSummaryResponse::from).toList(); }
+    @GetMapping("/admin/orders/operations")
+    List<OrderSummaryResponse> operationalList() { return service.operationalList().stream().map(OrderSummaryResponse::from).toList(); }
     @GetMapping("/orders/{id}")
     OrderResponse detail(Authentication authentication, @PathVariable UUID id) { return OrderResponse.from(service.detail(authentication.getName(), id)); }
     @PostMapping("/orders/{id}/cancel")

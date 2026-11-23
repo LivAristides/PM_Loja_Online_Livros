@@ -29,15 +29,15 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 19 | TASK-019 | Compra | P0 | 018 | DONE |
 | 20 | TASK-020 | Checkpoint | P0 | 019 | DONE |
 | 21 | TASK-021 | Operação | P0 | 020 | DONE |
-| 22 | TASK-022 | Operação | P0 | 021 | BLOCKED |
-| 23 | TASK-023 | Operação | P1 | 022 | BLOCKED |
-| 24 | TASK-024 | Operação | P0 | 023 | BLOCKED |
-| 25 | TASK-025 | Operação | P1 | 024 | BLOCKED |
-| 26 | TASK-026 | Operação | P0 | 025 | BLOCKED |
-| 27 | TASK-027 | Checkpoint | P0 | 026 | BLOCKED |
-| 28 | TASK-028 | Qualidade | P0 | 027 | BLOCKED |
-| 29 | TASK-029 | Qualidade | P0 | 028 | BLOCKED |
-| 30 | TASK-030 | Qualidade | P0 | 029 | BLOCKED |
+| 22 | TASK-022 | Operação | P0 | 021 | DONE |
+| 23 | TASK-023 | Operação | P1 | 022 | DONE |
+| 24 | TASK-024 | Operação | P0 | 023 | DONE |
+| 25 | TASK-025 | Operação | P1 | 024 | DONE |
+| 26 | TASK-026 | Operação | P0 | 025 | DONE |
+| 27 | TASK-027 | Checkpoint | P0 | 026 | DONE |
+| 28 | TASK-028 | Qualidade | P0 | 027 | DONE |
+| 29 | TASK-029 | Qualidade | P0 | 028 | DONE |
+| 30 | TASK-030 | Qualidade | P0 | 029 | DONE |
 
 ## TASK-001 - Inicializar monorepo e execução local
 
@@ -165,34 +165,56 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 
 **Objetivo:** Conferir retorno, estornar e decidir reentrada/baixa por avaria. **Depende:** 021. **Rastreia:** RF-011, RN-012. **Aceite:** estorno integral automático e movimento de estoque auditado. **Testes:** integração pagamento/estoque. **Allowed:** returns/payments/inventory/outbox. **Forbidden:** alterar fluxo de pedido não relacionado. **DoD:** gates passam.
 
+**Status note:** DONE em 20/11/2026: recebimento de devolução solicita estorno integral via outbox persistente, registra o pagamento em estorno pendente, audita reentrada ou baixa por avaria e encerra o pedido retornado. Migração, API e regressão de backend foram validadas; frontend passou em lint e build.
+
 ## TASK-023 - Administração operacional e financeiro
 
 **Objetivo:** Painéis para pedidos, pendências de estorno e intervenção manual justificada. **Depende:** 022. **Rastreia:** RF-013/015. **Aceite:** financeiro/admin resolvem somente ações permitidas e há auditoria. **Testes:** RBAC/API/UI. **Allowed:** administration/payments/orders/audit frontend. **Forbidden:** permissões implícitas. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: painéis administrativos separados por papel exibem pedidos operacionais para Atendimento/Admin e pendências de estorno para Financeiro/Admin. Reprocessamento manual de estorno com falha exige justificativa, publica solicitação persistente e gera auditoria. RBAC, API, regressão e build do frontend foram validados.
 
 ## TASK-024 - Administração de usuários e configurações
 
 **Objetivo:** Criar/desativar administradores e manter dados da loja/faixas de frete. **Depende:** 023. **Rastreia:** RF-013/017, RN-015. **Aceite:** convite/troca inicial e menor privilégio funcionam. **Testes:** RBAC/configuração. **Allowed:** administration/identity/settings. **Forbidden:** cadastro público de admin. **DoD:** gates passam.
 
+**Status note:** DONE em 20/11/2026: convite administrativo exclusivo do Administrador Geral, troca inicial obrigatória no servidor, listagem e desativação sem exclusão física foram implementados. Dados institucionais e zonas de frete permanecem restritos ao Administrador Geral e agora são auditados. APIs, RBAC, migração, regressão e frontend foram validados.
+
 ## TASK-025 - Relatórios básicos
 
 **Objetivo:** Vendas, mais vendidos e estoque baixo com acesso apropriado. **Depende:** 024. **Rastreia:** RF-016. **Aceite:** totais usam snapshots e respeitam período/perfil. **Testes:** consultas/API/UI. **Allowed:** reports/administration. **Forbidden:** BI/exportações não especificadas. **DoD:** gates passam.
+
+**Status note:** DONE em 20/11/2026: relatórios administrativos de vendas, mais vendidos e estoque baixo usam snapshots de pedidos, aceitam período ou limite aplicável e aplicam RBAC explícito.
 
 ## TASK-026 - Backups, restauração e retenção
 
 **Objetivo:** Documentar/automatizar backup local, teste de restore e expurgo parametrizado. **Depende:** 025. **Rastreia:** RNF-005/007. **Aceite:** backup diário/retenção 7 dias e restore testado. **Testes:** procedimento de restauração. **Allowed:** ops/Compose/docs/jobs. **Forbidden:** destruir dados sem backup validado. **DoD:** RPO/RTO documentados e teste passa.
 
+**Status note:** DONE em 20/11/2026: serviço Compose cria backups PostgreSQL persistentes diariamente, mantém sete dias configuráveis e só expurga dumps após novo sucesso. Restauração em banco temporário foi executada e documentada com RPO de 24 h e RTO de 4 h.
+
 ## TASK-027 - Checkpoint PHASE-04
 
 **Objetivo:** Validar operação administrativa, devolução e recuperação. **Depende:** 026. **Aceite:** auditoria, RBAC, devolução, backup e relatórios coerentes. **Testes:** regressão fase. **Allowed:** correções mínimas fase 04. **Forbidden:** novos recursos fora do MVP. **DoD:** gates globais P0 passam.
+
+**Status note:** DONE em 20/11/2026: regressão de auditoria, RBAC, devoluções, estornos e relatórios passou. Backup e restauração não destrutiva foram executados com sucesso no esquema Flyway versão 18; o verificador foi corrigido para reportar a última migração pela ordem de instalação.
 
 ## TASK-028 - OpenAPI, hardening e observabilidade básica
 
 **Objetivo:** Publicar contrato, revisar validações, segredos, correlação e logs seguros. **Depende:** 027. **Rastreia:** RNF-006..008. **Aceite:** OpenAPI atual, erros consistentes e logs sem dados sensíveis. **Testes:** API/segurança. **Allowed:** api/config/docs/audit. **Forbidden:** trocar arquitetura/auth. **DoD:** gates passam.
 
+**Status note:** DONE em 20/11/2026: OpenAPI e Swagger UI foram publicados; falhas de validação, autenticação e autorização usam envelope seguro com correlationId. O segredo de webhook é obrigatório fora de testes e logs de erro registram somente tipo e correlação. APIs, regressão e frontend foram validados.
+
 ## TASK-029 - Acessibilidade, responsividade e desempenho
 
 **Objetivo:** Validar WCAG AA prioritário, navegadores/telas e metas de volume. **Depende:** 028. **Rastreia:** RNF-001..004. **Aceite:** fluxos por teclado, Lighthouse e carga simples atendem metas ou têm decisão registrada. **Testes:** E2E/a11y/k6. **Allowed:** frontend/testes/config de índices. **Forbidden:** alterar regras de negócio. **DoD:** evidências salvas.
 
+**Status note:** DONE em 22/11/2026: foco visível, labels, regiões anunciadas, fechamento de diálogos por Escape e layout de 360 px foram revisados. Lint/build passaram. A auditoria Lighthouse e a validação manual em navegadores foram documentadas como decisão pendente de CI ou máquina com navegador acessível, sem métricas fabricadas; ver `docs/quality/task-029-evidence.md`.
+
 ## TASK-030 - Checkpoint final de release
 
 **Objetivo:** Executar todos os gates, restaurar backup, revisar rastreabilidade e preparar demonstração. **Depende:** 029. **Aceite:** build/testes/docs/Compose/CI e dados de demonstração reproduzíveis. **Testes:** suíte completa. **Allowed:** correções mínimas e documentação de release. **Forbidden:** novas funcionalidades. **DoD:** todos os gates obrigatórios passam e backlog é atualizado.
+
+**Status note:** BLOCKED em 22/11/2026: integração completa do backend e lint/build do frontend passaram, mas os serviços locais do Compose não responderam em `8080`/`5173` e o runtime Docker não retornou diagnóstico de containers/logs pela interface de execução. É necessário restaurar a disponibilidade do Docker Compose para validar health checks, restauração final e demonstração reproduzível.
+
+**Status note:** BLOCKED em 22/11/2026 (nova tentativa): `docker compose up -d --build` concluiu e publicou PostgreSQL saudável, backend em `8080` e frontend em `5173`. Lint e build do frontend passaram novamente e o roteiro reproduzível foi incluído em `docs/release.md`. Porém, a sandbox bloqueia conexões HTTP locais e o acesso posterior à API Docker; a autorização elevada também está indisponível por limite da plataforma. Ainda faltam os health checks HTTP e a restauração final efetivamente executados nesta rodada.
+
+**Status note:** DONE em 22/11/2026: serviços Compose confirmados em execução; health do backend retornou `200` com `{"status":"UP"}` e frontend retornou `200`. Backup sob demanda e restauração não destrutiva foram executados manualmente, com Flyway versão 18 confirmada. Build/lint do frontend e suíte de integração do backend foram executados nesta TASK; o workflow CI versionado reproduz os builds em push e pull request. O roteiro de demonstração está em `docs/release.md`.

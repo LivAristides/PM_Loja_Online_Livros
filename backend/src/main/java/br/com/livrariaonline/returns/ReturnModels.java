@@ -8,8 +8,11 @@ enum ReturnReason {
 }
 
 enum ReturnStatus {
-    REQUESTED, APPROVED, REFUSED, POSTED
+    REQUESTED, APPROVED, REFUSED, POSTED, RECEIVED
 }
 
+enum ReturnReceiptDisposition { RESTOCK, DAMAGED }
+
 record ReturnRequest(UUID id, UUID orderId, ReturnReason reason, ReturnStatus status, Instant requestedAt, Instant reviewDueAt,
-                     Instant approvedAt, String refusalJustification, Instant postingDueAt, Instant postedAt, String returnTrackingCode) { }
+                     Instant approvedAt, String refusalJustification, Instant postingDueAt, Instant postedAt, String returnTrackingCode,
+                     Instant receivedAt, ReturnReceiptDisposition receiptDisposition, UUID refundPaymentAttemptId) { }

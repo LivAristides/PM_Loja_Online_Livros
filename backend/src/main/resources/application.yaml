@@ -11,6 +11,12 @@ spring:
     jdbc:
       initialize-schema: never
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 app:
   consent:
     terms-version: ${TERMS_VERSION:2026-01}
@@ -21,7 +27,7 @@ app:
     batch-size: ${OUTBOX_BATCH_SIZE:20}
     max-attempts: ${OUTBOX_MAX_ATTEMPTS:3}
   payments:
-    webhook-secret: ${PAYMENT_WEBHOOK_SECRET:development-only-payment-webhook-secret}
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET}
     pix-reservation-minutes: ${PIX_RESERVATION_MINUTES:30}
     card-reservation-minutes: ${CARD_RESERVATION_MINUTES:15}
     expiration-polling-delay-ms: ${PAYMENT_EXPIRATION_POLLING_DELAY_MS:5000}
@@ -41,3 +47,7 @@ management:
     web:
       exposure:
         include: health,info
+
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{correlationId:-}]"

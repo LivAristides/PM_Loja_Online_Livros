@@ -4,6 +4,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,16 +16,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
 class ShippingApiIT {
     @Autowired private MockMvc mockMvc;
+    @Autowired private JdbcTemplate jdbc;
     @Test void administratorConfiguresZonesAndCustomerReceivesQuote() throws Exception {
         String body = "{\"name\":\"Sudeste teste\",\"postalCodeStart\":\"01000-000\",\"postalCodeEnd\":\"19999-999\",\"fee\":\"14.90\",\"estimatedBusinessDays\":4}";
         mockMvc.perform(post("/api/v1/admin/shipping-zones").with(user("admin").roles("GENERAL_ADMINISTRATOR")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.fee").value(14.90));
+        mockMvc.perform(put("/api/v1/admin/settings").with(user("admin").roles("GENERAL_ADMINISTRATOR")).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"storeName\":\"Livraria Teste\",\"contactEmail\":\"contato@example.test\",\"contactPhone\":\"11999999999\"}"))
+                .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/v1/checkout/shipping-quote").param("postalCode", "01310-100").with(user("customer").roles("CUSTOMER")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.zoneName").value("Sudeste teste")).andExpect(jsonPath("$.estimatedBusinessDays").value(4));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM audit_log WHERE action IN ('SHIPPING_ZONE_CREATED', 'STORE_SETTINGS_UPDATED')", Integer.class)).isGreaterThanOrEqualTo(2);
     }
     @Test void zoneAndQuoteEnforceAuthorizationAndPostalCodeCoverage() throws Exception {
         mockMvc.perform(post("/api/v1/admin/shipping-zones").with(user("customer").roles("CUSTOMER")).with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{}"))
