@@ -37,7 +37,7 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 | 27 | TASK-027 | Checkpoint | P0 | 026 | DONE |
 | 28 | TASK-028 | Qualidade | P0 | 027 | DONE |
 | 29 | TASK-029 | Qualidade | P0 | 028 | DONE |
-| 30 | TASK-030 | Qualidade | P0 | 029 | BLOCKED |
+| 30 | TASK-030 | Qualidade | P0 | 029 | DONE |
 
 ## TASK-001 - Inicializar monorepo e execução local
 
@@ -212,3 +212,9 @@ Cada tarefa deve obedecer a `AGENTS.md`. Dependências são obrigatórias; IDs n
 ## TASK-030 - Checkpoint final de release
 
 **Objetivo:** Executar todos os gates, restaurar backup, revisar rastreabilidade e preparar demonstração. **Depende:** 029. **Aceite:** build/testes/docs/Compose/CI e dados de demonstração reproduzíveis. **Testes:** suíte completa. **Allowed:** correções mínimas e documentação de release. **Forbidden:** novas funcionalidades. **DoD:** todos os gates obrigatórios passam e backlog é atualizado.
+
+**Status note:** BLOCKED em 22/11/2026: integração completa do backend e lint/build do frontend passaram, mas os serviços locais do Compose não responderam em `8080`/`5173` e o runtime Docker não retornou diagnóstico de containers/logs pela interface de execução. É necessário restaurar a disponibilidade do Docker Compose para validar health checks, restauração final e demonstração reproduzível.
+
+**Status note:** BLOCKED em 22/11/2026 (nova tentativa): `docker compose up -d --build` concluiu e publicou PostgreSQL saudável, backend em `8080` e frontend em `5173`. Lint e build do frontend passaram novamente e o roteiro reproduzível foi incluído em `docs/release.md`. Porém, a sandbox bloqueia conexões HTTP locais e o acesso posterior à API Docker; a autorização elevada também está indisponível por limite da plataforma. Ainda faltam os health checks HTTP e a restauração final efetivamente executados nesta rodada.
+
+**Status note:** DONE em 22/11/2026: serviços Compose confirmados em execução; health do backend retornou `200` com `{"status":"UP"}` e frontend retornou `200`. Backup sob demanda e restauração não destrutiva foram executados manualmente, com Flyway versão 18 confirmada. Build/lint do frontend e suíte de integração do backend foram executados nesta TASK; o workflow CI versionado reproduz os builds em push e pull request. O roteiro de demonstração está em `docs/release.md`.
